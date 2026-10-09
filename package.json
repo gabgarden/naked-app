@@ -13,6 +13,9 @@
     "build:web": "npm run build --workspace=liga-da-pelada",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
-    "docker:db": "docker compose up postgres adminer -d"
+    "docker:db": "docker compose up postgres adminer -d",
+    "prod:up": "docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build",
+    "prod:down": "docker compose -f docker-compose.yml -f docker-compose.prod.yml down",
+    "prod:logs": "docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f"
   }
 }

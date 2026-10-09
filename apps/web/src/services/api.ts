@@ -1,7 +1,14 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+function getApiUrl(): string {
+  if (typeof window === 'undefined') {
+    return process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  }
+  return process.env.NEXT_PUBLIC_API_URL !== undefined ? process.env.NEXT_PUBLIC_API_URL : '';
+}
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const baseUrl = getApiUrl();
+  const url = `${baseUrl}${path}`;
+  const res = await fetch(url, {
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -14,7 +21,8 @@ export async function apiGet<T>(path: string): Promise<T> {
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -28,7 +36,8 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}${path}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
@@ -43,7 +52,8 @@ export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
 }
 
 export async function apiDelete(path: string, body?: unknown): Promise<void> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const baseUrl = getApiUrl();
+  const res = await fetch(`${baseUrl}${path}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,

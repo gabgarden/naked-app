@@ -1,0 +1,495 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* ============================================================
+   Pelada App v2 — Design System
+   Tema: Laranja Fogo + Grafite Profundo
+   "Na rua, na quadra, na várzea"
+   ============================================================ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border-color);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-dark: var(--accent-dark);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --font-sans: var(--font-inter);
+  --font-display: 'Barlow Condensed', sans-serif;
+}
+
+:root {
+  /* Grafite profundo */
+  --background: #0D0F14;
+  --surface: #13181F;
+  --surface-2: #181E28;
+  --surface-hover: #1E2535;
+  --border-color: #252D3D;
+
+  /* Accent — laranja fogo → âmbar */
+  --accent: #F97316;
+  --accent-light: #FB923C;
+  --accent-dark: #EA580C;
+  --accent-glow: rgba(249, 115, 22, 0.2);
+
+  /* Secundário — azul elétrico para destaques */
+  --secondary: #3B82F6;
+  --secondary-light: #60A5FA;
+
+  /* Semânticos */
+  --muted: #5A6480;
+  --muted-light: #8A95B0;
+  --success: #22C55E;
+  --danger: #EF4444;
+  --warning: #EAB308;
+  --foreground: #EEF2FF;
+  --foreground-muted: #B0BAD0;
+
+  /* Times */
+  --team-blue: #3B82F6;
+  --team-red: #EF4444;
+  --team-black: #374151;
+  --team-green: #22C55E;
+  --team-yellow: #EAB308;
+  --team-white: #F8FAFC;
+  --team-orange: #F97316;
+  --team-purple: #A855F7;
+
+  /* Layout */
+  --bottom-nav-height: 5rem;
+  --header-height: 3.5rem;
+  --radius: 0.875rem;
+  --radius-sm: 0.5rem;
+  --radius-lg: 1.25rem;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+main {
+  padding-bottom: calc(var(--bottom-nav-height) + 1.5rem);
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 999px;
+}
+
+/* ============================================================
+   Tipografia de Exibição
+   ============================================================ */
+
+.font-display {
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   Animações
+   ============================================================ */
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-bottom {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow-orange {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+  50%       { box-shadow: 0 0 18px 6px rgba(249, 115, 22, 0.18); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes bounce-score {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes goal-flash {
+  0%, 100% { background: transparent; }
+  20%       { background: rgba(249, 115, 22, 0.12); }
+}
+
+.animate-fade-in       { animation: fade-in 0.35s ease-out both; }
+.animate-fade-in-up    { animation: fade-in-up 0.45s ease-out both; }
+.animate-slide-in-bottom { animation: slide-in-bottom 0.3s cubic-bezier(.22,1,.36,1) both; }
+.animate-scale-in      { animation: scale-in 0.3s ease-out both; }
+.animate-pulse-glow    { animation: pulse-glow-orange 2.5s ease-in-out infinite; }
+.animate-bounce-score  { animation: bounce-score 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+.animate-goal-flash    { animation: goal-flash 0.8s ease-out; }
+
+/* Stagger delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.30s; }
+
+/* ============================================================
+   Cards — Glass + Solid
+   ============================================================ */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.card-hover {
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.card-hover:hover {
+  border-color: rgba(249, 115, 22, 0.35);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+
+.glass-card {
+  background: linear-gradient(
+    145deg,
+    rgba(19, 24, 31, 0.85) 0%,
+    rgba(19, 24, 31, 0.65) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(37, 45, 61, 0.8);
+  border-radius: var(--radius);
+}
+
+.glass-card-hover {
+  transition: all 0.2s ease;
+}
+.glass-card-hover:hover {
+  border-color: rgba(249, 115, 22, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Card com borda de accent ao hover */
+.card-accent-hover {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card-accent-hover:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 24px rgba(249, 115, 22, 0.1);
+}
+
+/* ============================================================
+   Gradiente Laranja (texto + bg)
+   ============================================================ */
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent) 0%, #FBBF24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-accent-gradient {
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 50%, #FBBF24 100%);
+}
+
+.bg-accent-subtle {
+  background: rgba(249, 115, 22, 0.1);
+}
+
+/* ============================================================
+   Botões
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  padding: 0.625rem 1.25rem;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.3);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent) 0%, #FBBF24 100%);
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.45);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--foreground);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(249, 115, 22, 0.06);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted-light);
+}
+.btn-ghost:hover {
+  color: var(--foreground);
+  background: var(--surface-hover);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--danger);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.875rem;
+  font-size: 0.8125rem;
+}
+
+.btn-lg {
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  border-radius: var(--radius);
+}
+
+/* ============================================================
+   Inputs
+   ============================================================ */
+
+.input {
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  padding: 0.625rem 0.875rem;
+  width: 100%;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  outline: none;
+}
+.input::placeholder { color: var(--muted); }
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+/* ============================================================
+   Stat Number
+   ============================================================ */
+
+.stat-number {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* ============================================================
+   Rank Badges
+   ============================================================ */
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  flex-shrink: 0;
+}
+
+.rank-1 { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: #0D0F14; }
+.rank-2 { background: linear-gradient(135deg, #94A3B8 0%, #64748B 100%); color: #0D0F14; }
+.rank-3 { background: linear-gradient(135deg, #CD7F32 0%, #92400E 100%); color: #F1F5F9; }
+.rank-other { background: var(--surface-hover); color: var(--muted-light); }
+
+/* ============================================================
+   Team Color Dot
+   ============================================================ */
+
+.team-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.team-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   Status Badges
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge-success  { background: rgba(34, 197, 94, 0.15);  color: var(--success); }
+.badge-danger   { background: rgba(239, 68, 68, 0.15);  color: var(--danger);  }
+.badge-warning  { background: rgba(234, 179, 8, 0.15);  color: var(--warning); }
+.badge-accent   { background: rgba(249, 115, 22, 0.15); color: var(--accent);  }
+.badge-muted    { background: var(--surface-hover);      color: var(--muted-light); }
+.badge-blue     { background: rgba(59, 130, 246, 0.15); color: var(--secondary); }
+
+/* ============================================================
+   Skeleton Loading
+   ============================================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-hover) 50%,
+    var(--surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   Score Display
+   ============================================================ */
+
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.score-separator {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 1.1em;
+}
+
+/* ============================================================
+   Divisor com label
+   ============================================================ */
+
+.divider-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.divider-label::before,
+.divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+
+/* ============================================================
+   Header accent linha
+   ============================================================ */
+
+.header-accent-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}

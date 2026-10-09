@@ -1,0 +1,18 @@
+{
+  "name": "pelada-app",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Sistema de Gestão de Peladas - Clean Architecture & DDD",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev --workspace=pelada-api",
+    "dev:web": "npm run dev --workspace=liga-da-pelada",
+    "build:api": "npm run build --workspace=pelada-api",
+    "build:web": "npm run build --workspace=liga-da-pelada",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:db": "docker compose up postgres adminer -d"
+  }
+}

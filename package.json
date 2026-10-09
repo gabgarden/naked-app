@@ -1,16 +1,16 @@
 {
-  "name": "pelada-app",
+  "name": "naked-app",
   "version": "2.0.0",
   "private": true,
-  "description": "Sistema de Gestão de Peladas - Clean Architecture & DDD",
+  "description": "Naked App - Sistema de Gestão de Peladas (Clean Architecture & DDD)",
   "workspaces": [
     "apps/*"
   ],
   "scripts": {
-    "dev:api": "npm run dev --workspace=pelada-api",
-    "dev:web": "npm run dev --workspace=liga-da-pelada",
-    "build:api": "npm run build --workspace=pelada-api",
-    "build:web": "npm run build --workspace=liga-da-pelada",
+    "dev:api": "npm run dev --workspace=naked-api",
+    "dev:web": "npm run dev --workspace=naked-web",
+    "build:api": "npm run build --workspace=naked-api",
+    "build:web": "npm run build --workspace=naked-web",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
     "docker:db": "docker compose up postgres adminer -d",

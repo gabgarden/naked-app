@@ -1,19 +1,19 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: pelada-db
+    container_name: naked-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pelada_app
+      POSTGRES_DB: naked_app
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./apps/api/src/infrastructure/database/postgres/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d pelada_app"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d naked_app"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,7 +22,7 @@ services:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
-    container_name: pelada-api
+    container_name: naked-api
     restart: unless-stopped
     ports:
       - "3001:3001"
@@ -32,8 +32,8 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      DB_NAME: pelada_app
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/pelada_app
+      DB_NAME: naked_app
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/naked_app
       CORS_ORIGIN: http://localhost:3000
     depends_on:
       postgres:
@@ -43,7 +43,7 @@ services:
     build:
       context: ./apps/web
       dockerfile: Dockerfile
-    container_name: pelada-web
+    container_name: naked-web
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -55,7 +55,7 @@ services:
 
   adminer:
     image: adminer:latest
-    container_name: pelada-adminer
+    container_name: naked-adminer
     restart: unless-stopped
     ports:
       - "8080:8080"

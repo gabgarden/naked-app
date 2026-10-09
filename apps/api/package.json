@@ -1,7 +1,7 @@
 {
-  "name": "pelada-api",
+  "name": "naked-api",
   "version": "1.0.0",
-  "description": "Pelada App — REST API",
+  "description": "Naked App — REST API",
   "main": "dist/interface/http/server.js",
   "scripts": {
     "dev": "tsx watch src/interface/http/server.ts",

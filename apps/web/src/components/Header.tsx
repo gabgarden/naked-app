@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 
 const pageTitles: Record<string, string> = {
-  '/': 'Pelada App',
+  '/': 'Naked App',
   '/jogadores': 'Jogadores',
   '/jogadores/novo': 'Novo Jogador',
   '/peladas': 'Peladas',
@@ -16,7 +16,7 @@ function getTitle(pathname: string): string {
   if (pathname.includes('/partidas/')) return 'Partida';
   if (pathname.match(/^\/peladas\/[^/]+$/)) return 'Pelada';
   if (pathname.match(/^\/jogadores\/[^/]+$/)) return 'Jogador';
-  return 'Pelada App';
+  return 'Naked App';
 }
 
 export default function Header() {

@@ -2,19 +2,21 @@
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
 #
-# TLS/SSL is terminated by the host Nginx (/etc/nginx/sites-available/pelada.conf),
+# TLS/SSL is terminated by the host Nginx (/etc/nginx/sites-available/naked.conf),
 # which proxies to the container Nginx on port :8084.
 # Certificates are issued and renewed by the host Certbot (certbot --nginx).
 
 services:
   postgres:
+    container_name: naked-db
     ports: !reset []
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      POSTGRES_DB: ${POSTGRES_DB:-pelada_app}
+      POSTGRES_DB: ${POSTGRES_DB:-naked_app}
 
   api:
+    container_name: naked-api
     ports: !reset []
     environment:
       PORT: 3001
@@ -22,11 +24,12 @@ services:
       DB_PORT: 5432
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB:-pelada_app}
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pelada_app}
+      DB_NAME: ${POSTGRES_DB:-naked_app}
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-naked_app}
       CORS_ORIGIN: "*"
 
   web:
+    container_name: naked-web
     ports: !reset []
     environment:
       PORT: 3000
@@ -39,7 +42,7 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
-    container_name: pelada-nginx
+    container_name: naked-nginx
     restart: unless-stopped
     ports:
       - "${PORT:-8084}:80"

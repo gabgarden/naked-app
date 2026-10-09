@@ -1,12 +1,13 @@
-# 🚀 Guia de Deploy na VPS (Hostinger) — Pelada App v2
+# 🚀 Guia de Deploy na VPS (Hostinger) — Naked App
+# Repositório: https://github.com/gabgarden/naked-app
 
-Guia passo a passo com todos os comandos necessários para rodar o **Pelada App** na VPS ao lado dos outros projetos (`sales-system`, `blood-match`, `gps-tracking-SSE`, `garden`, etc.), seguindo a arquitetura de duas camadas de Nginx e gerenciamento de portas.
+Guia passo a passo com todos os comandos necessários para rodar o **Naked App** na VPS ao lado dos outros projetos (`sales-system`, `blood-match`, `gps-tracking-SSE`, `garden`, etc.), seguindo a arquitetura de duas camadas de Nginx e gerenciamento de portas.
 
 ---
 
 ## 🗺️ 1. Mapeamento de Portas e Coexistência na VPS
 
-Para não conflitar com nenhum outro projeto já hospedado na VPS, o **Pelada App** utiliza a porta **`8084`** para o seu gateway Nginx interno:
+Para não conflitar com nenhum outro projeto já hospedado na VPS, o **Naked App** utiliza a porta **`8084`** para o seu gateway Nginx interno:
 
 | Projeto | Domínio / Função | Porta no Host VPS | Destino Interno |
 |---|---|---|---|
@@ -14,7 +15,7 @@ Para não conflitar com nenhum outro projeto já hospedado na VPS, o **Pelada Ap
 | **sales-system** | `belezaempotes.tech` | `8081` | Container Nginx borda |
 | **blood-match** | `bloodmatch.com.br` | `8082` | Container Nginx borda (:80) |
 | **gps-tracking-SSE** | GPS Tracking em tempo real | `8083` | Container Nginx borda (:80) |
-| ⚽ **liga-da-pelada** | **Pelada App v2** | **`8084`** | **Container Nginx borda (:80)** |
+| ⚽ **naked-app** | **Naked App** | **`8084`** | **Container Nginx borda (:80)** |
 | *Adminers / DBs* | Ferramentas administrativas | `8088`, etc. | Adminer |
 
 ---

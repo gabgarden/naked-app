@@ -10,7 +10,7 @@ async function getPlayers() {
   }
 }
 
-export default async function JogadoresPage() {
+export default async function PlayersPage() {
   const players = await getPlayers();
 
   return (
@@ -21,15 +21,15 @@ export default async function JogadoresPage() {
             className="text-2xl font-bold"
             style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
           >
-            Jogadores
+            Players
           </h1>
           <p className="text-sm" style={{ color: 'var(--muted)' }}>
-            {players.length} cadastrado{players.length !== 1 ? 's' : ''}
+            {players.length} registered
           </p>
         </div>
-        <Link href="/jogadores/novo" id="btn-novo-jogador" className="btn btn-primary">
+        <Link href="/players/new" id="btn-new-player" className="btn btn-primary">
           <UserPlus className="w-4 h-4" />
-          Novo
+          New
         </Link>
       </div>
 
@@ -39,14 +39,14 @@ export default async function JogadoresPage() {
             👤
           </div>
           <div>
-            <p className="font-bold text-base" style={{ color: 'var(--foreground)' }}>Nenhum jogador ainda</p>
+            <p className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No players registered yet</p>
             <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
-              Cadastre os jogadores da sua pelada para começar
+              Add players to your roster to get started
             </p>
           </div>
-          <Link href="/jogadores/novo" className="btn btn-primary">
+          <Link href="/players/new" className="btn btn-primary">
             <UserPlus className="w-4 h-4" />
-            Cadastrar primeiro jogador
+            Add first player
           </Link>
         </div>
       )}
@@ -56,7 +56,7 @@ export default async function JogadoresPage() {
           {players.map((player, i) => (
             <Link
               key={player.id}
-              href={`/jogadores/${player.id}`}
+              href={`/players/${player.id}`}
               className={`flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[var(--surface-hover)] animate-fade-in stagger-${Math.min(i + 1, 6)} ${i < players.length - 1 ? 'border-b border-[var(--border-color)]' : ''}`}
             >
               <div

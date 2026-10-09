@@ -4,18 +4,23 @@ import { usePathname } from 'next/navigation';
 
 const pageTitles: Record<string, string> = {
   '/': 'Naked App',
-  '/jogadores': 'Jogadores',
-  '/jogadores/novo': 'Novo Jogador',
-  '/peladas': 'Peladas',
-  '/peladas/nova': 'Nova Pelada',
+  '/players': 'Players',
+  '/players/new': 'New Player',
+  '/rounds': 'Rounds',
+  '/rounds/new': 'New Round',
   '/ranking': 'Ranking',
+  // Legacy aliases
+  '/jogadores': 'Players',
+  '/jogadores/novo': 'New Player',
+  '/peladas': 'Rounds',
+  '/peladas/nova': 'New Round',
 };
 
 function getTitle(pathname: string): string {
   if (pageTitles[pathname]) return pageTitles[pathname];
-  if (pathname.includes('/partidas/')) return 'Partida';
-  if (pathname.match(/^\/peladas\/[^/]+$/)) return 'Pelada';
-  if (pathname.match(/^\/jogadores\/[^/]+$/)) return 'Jogador';
+  if (pathname.includes('/matches/') || pathname.includes('/partidas/')) return 'Match';
+  if (pathname.match(/^\/rounds\/[^/]+$/) || pathname.match(/^\/peladas\/[^/]+$/)) return 'Round';
+  if (pathname.match(/^\/players\/[^/]+$/) || pathname.match(/^\/jogadores\/[^/]+$/)) return 'Player';
   return 'Naked App';
 }
 

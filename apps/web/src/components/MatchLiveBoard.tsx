@@ -69,7 +69,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
 
   async function handleFinish() {
     if (
-      !confirm('Tem certeza que deseja encerrar esta partida? O resultado computará pontos no ranking!')
+      !confirm('Are you sure you want to finish this match? The result will compute points in the ranking!')
     ) {
       return;
     }
@@ -81,7 +81,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
       setMatch((prev) => ({ ...prev, status: 'finished' }));
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao finalizar partida.');
+      setError(err instanceof Error ? err.message : 'Error finishing match.');
     } finally {
       setLoading(false);
     }
@@ -109,7 +109,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
       setGoalModal({ open: false, teamId: '', scorerId: null });
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao registrar gol.');
+      setError(err instanceof Error ? err.message : 'Error registering goal.');
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
 
   async function handleDeleteEvent(eventId: string, teamId: string) {
     if (isFinished) return;
-    if (!confirm('Deseja anular este gol?')) return;
+    if (!confirm('Do you want to cancel this goal?')) return;
 
     setLoading(true);
     try {
@@ -126,7 +126,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
       setMatch(updated);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao remover evento.');
+      setError(err instanceof Error ? err.message : 'Error removing event.');
     } finally {
       setLoading(false);
     }
@@ -142,7 +142,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <Link
-          href={`/peladas/${match.round_id}`}
+          href={`/rounds/${match.round_id}`}
           className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
           style={{ background: 'var(--surface-hover)', color: 'var(--muted)' }}
         >
@@ -157,7 +157,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
           }}
         >
           {!isFinished && <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />}
-          {isFinished ? 'Finalizada' : match.status === 'in_progress' ? 'Em Andamento' : 'Aguardando'}
+          {isFinished ? 'Finished' : match.status === 'in_progress' ? 'In Progress' : 'Pending'}
         </div>
       </div>
 
@@ -309,13 +309,13 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
           className="text-xs font-bold uppercase tracking-wider px-1 flex items-center gap-1.5"
           style={{ color: 'var(--muted)' }}
         >
-          <Clock className="w-4 h-4" /> Timeline de Gols
+          <Clock className="w-4 h-4" /> Goals Timeline
         </h2>
 
         <div className="space-y-2">
           {(!match.match_events || match.match_events.length === 0) ? (
             <div className="card p-5 text-center text-xs" style={{ color: 'var(--muted)' }}>
-              Nenhum gol anotado nesta partida ainda.
+              No goals recorded in this match yet.
             </div>
           ) : (
             match.match_events.map((ev) => {
@@ -340,11 +340,11 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                     <span className="text-xl">⚽</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold truncate" style={{ color: 'var(--foreground)' }}>
-                        {getDisplayName(ev.player?.name || 'Jogador', ev.player?.nickname)}
+                        {getDisplayName(ev.player?.name || 'Player', ev.player?.nickname)}
                       </p>
                       {ev.assist_player && (
                         <p className="text-[11px]" style={{ color: 'var(--muted)' }}>
-                          Passe:{' '}
+                          Assist:{' '}
                           <span style={{ color: 'var(--foreground)' }}>
                             {getDisplayName(ev.assist_player.name, ev.assist_player.nickname)}
                           </span>
@@ -382,7 +382,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
             style={{ color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)' }}
           >
             <Trophy className="w-5 h-5" />
-            Encerrar Partida
+            Finish Match
           </button>
         </div>
       )}
@@ -396,7 +396,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
               style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}
             >
               <h3 className="font-bold text-sm" style={{ color: 'var(--foreground)' }}>
-                {goalModal.scorerId ? 'Quem deu a assistência?' : 'Quem marcou o gol?'}
+                {goalModal.scorerId ? 'Who provided the assist?' : 'Who scored the goal?'}
               </h3>
               <button
                 type="button"
@@ -413,7 +413,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                 // Step 1: Select scorer
                 activePlayers.length === 0 ? (
                   <div className="p-4 text-center text-xs" style={{ color: 'var(--muted)' }}>
-                    Nenhum jogador encontrado neste time.
+                    No players found in this team.
                   </div>
                 ) : (
                   activePlayers.map((player) => (
@@ -452,11 +452,11 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                     disabled={loading}
                     className="btn btn-primary w-full py-3 text-xs mb-3"
                   >
-                    Gol individual (Sem assistência)
+                    Solo Goal (No assist)
                   </button>
 
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-2 px-1" style={{ color: 'var(--muted)' }}>
-                    Ou escolha o passador:
+                    Or select the playmaker:
                   </p>
 
                   {otherPlayers.map((player) => (

@@ -29,10 +29,10 @@ export default async function RankingPage() {
             className="text-2xl font-bold"
             style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
           >
-            Ranking Geral
+            Global Ranking
           </h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
-            Estatísticas acumuladas de todas as peladas
+            Cumulative stats across all rounds
           </p>
         </div>
         <div
@@ -52,13 +52,13 @@ export default async function RankingPage() {
             🏆
           </div>
           <h2 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>
-            Nenhum dado de ranking ainda
+            No ranking data yet
           </h2>
           <p className="text-sm max-w-xs" style={{ color: 'var(--muted)' }}>
-            Inicie e finalize partidas nas suas peladas para computar os pontos dos jogadores!
+            Start and finish matches in your rounds to compute player rankings!
           </p>
-          <Link href="/peladas" className="btn btn-primary mt-2">
-            Ver Peladas
+          <Link href="/rounds" className="btn btn-primary mt-2">
+            View Rounds
           </Link>
         </div>
       ) : (
@@ -85,10 +85,10 @@ export default async function RankingPage() {
                 return (
                   <Link
                     key={player.player_id}
-                    href={`/jogadores/${player.player_id}`}
+                    href={`/players/${player.player_id}`}
                     className="flex flex-col items-center w-1/3 max-w-[110px] group transition-transform hover:-translate-y-1"
                   >
-                    {/* Avatar & Medalha */}
+                    {/* Avatar & Medal */}
                     <div className="relative mb-2 flex flex-col items-center">
                       <div
                         className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-black shadow-lg relative border-2"
@@ -105,11 +105,11 @@ export default async function RankingPage() {
                         className="absolute -bottom-2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-md z-10"
                         style={{ background: medalBg }}
                       >
-                        {position}º
+                        {position}
                       </div>
                     </div>
 
-                    {/* Nome & Pontos */}
+                    {/* Name & Points */}
                     <p
                       className="font-bold text-xs truncate w-full text-center mt-1"
                       style={{ color: 'var(--foreground)' }}
@@ -158,11 +158,11 @@ export default async function RankingPage() {
             >
               <div className="flex items-center gap-3">
                 <span className="w-6 text-center">#</span>
-                <span>Jogador</span>
+                <span>Player</span>
               </div>
               <div className="flex items-center gap-4 text-right">
-                <span className="w-8">J</span>
-                <span className="w-8">V</span>
+                <span className="w-8">M</span>
+                <span className="w-8">W</span>
                 <span className="w-8">G</span>
                 <span className="w-8">A</span>
                 <span className="w-12 text-right">PTS</span>
@@ -176,7 +176,7 @@ export default async function RankingPage() {
               return (
                 <Link
                   key={player.player_id}
-                  href={`/jogadores/${player.player_id}`}
+                  href={`/players/${player.player_id}`}
                   className={`flex items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--surface-hover)] ${
                     idx < ranking.length - 1 ? 'border-b border-[var(--border-color)]' : ''
                   }`}
@@ -195,7 +195,7 @@ export default async function RankingPage() {
                             : 'var(--muted)',
                       }}
                     >
-                      {rank}º
+                      {rank}
                     </span>
 
                     <div

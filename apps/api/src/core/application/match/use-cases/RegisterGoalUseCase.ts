@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { Result } from '../../../domain/shared/Result';
-import { IMatchRepository } from '../../../domain/pelada/repositories/IMatchRepository';
-import { MatchEvent } from '../../../domain/pelada/entities/MatchEvent';
+import { IMatchRepository } from '../../../domain/match/repositories/IMatchRepository';
+import { MatchEvent } from '../../../domain/match/entities/MatchEvent';
 
 interface RegisterGoalInput {
   matchId: string;
@@ -17,7 +17,7 @@ export class RegisterGoalUseCase {
   public async execute(input: RegisterGoalInput): Promise<Result<MatchEvent>> {
     const match = await this.matchRepository.findById(input.matchId);
     if (!match) {
-      return Result.fail('Partida não encontrada.');
+      return Result.fail('Match not found.');
     }
 
     const eventId = uuid();

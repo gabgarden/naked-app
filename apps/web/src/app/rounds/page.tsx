@@ -1,20 +1,20 @@
 import Link from 'next/link';
-import { Calendar, Plus, ChevronRight, Flame, Clock, CheckCircle2 } from 'lucide-react';
-import { peladasService, Round } from '../../services/peladas.service';
+import { Calendar, Plus, ChevronRight, Flame, CheckCircle2 } from 'lucide-react';
+import { roundsService, Round } from '../../services/rounds.service';
 import { formatDateBR } from '../../lib/utils';
 
 export const revalidate = 0;
 
-async function getPeladas(): Promise<Round[]> {
+async function getRounds(): Promise<Round[]> {
   try {
-    return await peladasService.list();
+    return await roundsService.list();
   } catch {
     return [];
   }
 }
 
-export default async function PeladasPage() {
-  const peladas = await getPeladas();
+export default async function RoundsPage() {
+  const rounds = await getRounds();
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -25,20 +25,20 @@ export default async function PeladasPage() {
             className="text-2xl font-bold"
             style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
           >
-            Peladas
+            Rounds
           </h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
-            {peladas.length} sessão{peladas.length !== 1 ? 'ões' : ''} registrada{peladas.length !== 1 ? 's' : ''}
+            {rounds.length} session{rounds.length !== 1 ? 's' : ''} recorded
           </p>
         </div>
 
-        <Link href="/peladas/nova" className="btn btn-primary">
+        <Link href="/rounds/new" className="btn btn-primary">
           <Plus className="w-4 h-4" />
-          Nova Pelada
+          New Round
         </Link>
       </div>
 
-      {peladas.length === 0 ? (
+      {rounds.length === 0 ? (
         <div className="card p-10 flex flex-col items-center justify-center text-center space-y-4">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
@@ -48,27 +48,27 @@ export default async function PeladasPage() {
           </div>
           <div>
             <h2 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>
-              Nenhuma pelada realizada ainda
+              No rounds played yet
             </h2>
             <p className="text-sm mt-1 max-w-xs" style={{ color: 'var(--muted)' }}>
-              Crie a primeira pelada para montar os times e registrar os jogos!
+              Create your first round to form teams and track live matches!
             </p>
           </div>
-          <Link href="/peladas/nova" className="btn btn-primary">
+          <Link href="/rounds/new" className="btn btn-primary">
             <Plus className="w-4 h-4" />
-            Criar Primeira Pelada
+            Create First Round
           </Link>
         </div>
       ) : (
         <div className="space-y-3">
-          {peladas.map((pelada) => {
-            const isActive = pelada.status === 'active';
-            const isFinished = pelada.status === 'finished';
+          {rounds.map((round) => {
+            const isActive = round.status === 'active';
+            const isFinished = round.status === 'finished';
 
             return (
               <Link
-                key={pelada.id}
-                href={`/peladas/${pelada.id}`}
+                key={round.id}
+                href={`/rounds/${round.id}`}
                 className="card card-hover p-4.5 block transition-all relative overflow-hidden"
                 style={{
                   borderColor: isActive ? 'var(--accent)' : 'var(--border-color)',
@@ -104,7 +104,7 @@ export default async function PeladasPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-bold text-base truncate" style={{ color: 'var(--foreground)' }}>
-                          {formatDateBR(pelada.date)}
+                          {formatDateBR(round.date)}
                         </p>
                         <span
                           className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex-shrink-0"
@@ -121,13 +121,13 @@ export default async function PeladasPage() {
                               : 'var(--muted)',
                           }}
                         >
-                          {isActive ? 'Ao Vivo' : isFinished ? 'Finalizada' : 'Rascunho'}
+                          {isActive ? 'Live' : isFinished ? 'Finished' : 'Draft'}
                         </span>
                       </div>
 
-                      {pelada.notes && (
+                      {round.notes && (
                         <p className="text-xs truncate mt-0.5" style={{ color: 'var(--muted)' }}>
-                          {pelada.notes}
+                          {round.notes}
                         </p>
                       )}
                     </div>

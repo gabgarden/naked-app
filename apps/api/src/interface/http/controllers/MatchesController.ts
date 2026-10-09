@@ -7,16 +7,16 @@ import {
   finishMatchUseCase,
   startMatchUseCase,
 } from '../../../infrastructure/di/container';
-import { Match } from '../../../core/domain/pelada/entities/Match';
-import { Score } from '../../../core/domain/pelada/value-objects/Score';
-import { MatchStatus } from '../../../core/domain/pelada/value-objects/MatchStatus';
+import { Match } from '../../../core/domain/match/entities/Match';
+import { Score } from '../../../core/domain/match/value-objects/Score';
+import { MatchStatus } from '../../../core/domain/match/value-objects/MatchStatus';
 
 export class MatchesController {
   async create(req: Request, res: Response) {
     try {
       const { roundId, teamAId, teamBId, matchOrder } = req.body;
       if (!roundId || !teamAId || !teamBId) {
-        return res.status(400).json({ error: 'roundId, teamAId e teamBId são obrigatórios.' });
+        return res.status(400).json({ error: 'roundId, teamAId, and teamBId are required.' });
       }
 
       const id = randomUUID();
@@ -34,17 +34,17 @@ export class MatchesController {
       res.status(201).json({ data: { matchId: id } });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: 'Erro ao criar partida.' });
+      res.status(500).json({ error: 'Error creating match.' });
     }
   }
 
   async getDetails(req: Request, res: Response) {
     try {
       const details = await matchRepository.getMatchDetails(req.params.id);
-      if (!details) return res.status(404).json({ error: 'Partida não encontrada.' });
+      if (!details) return res.status(404).json({ error: 'Match not found.' });
       res.json({ data: details });
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao buscar partida.' });
+      res.status(500).json({ error: 'Error fetching match.' });
     }
   }
 
@@ -63,7 +63,7 @@ export class MatchesController {
   async registerGoal(req: Request, res: Response) {
     const { teamId, playerId, assistPlayerId, minute } = req.body;
     if (!teamId || !playerId) {
-      return res.status(400).json({ error: 'teamId e playerId são obrigatórios.' });
+      return res.status(400).json({ error: 'teamId and playerId are required.' });
     }
 
     const result = await registerGoalUseCase.execute({
@@ -80,7 +80,7 @@ export class MatchesController {
 
   async deleteGoal(req: Request, res: Response) {
     const { teamId } = req.body;
-    if (!teamId) return res.status(400).json({ error: 'teamId é obrigatório.' });
+    if (!teamId) return res.status(400).json({ error: 'teamId is required.' });
 
     const result = await deleteGoalEventUseCase.execute({
       matchId: req.params.id,

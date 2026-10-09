@@ -1,19 +1,19 @@
 import Link from 'next/link';
 import { Calendar, Trophy, ChevronRight, Flame, Users } from 'lucide-react';
 import { rankingService } from '../services/ranking.service';
-import { peladasService } from '../services/peladas.service';
+import { roundsService } from '../services/rounds.service';
 
 async function getDashboardData() {
   try {
-    const [ranking, peladas] = await Promise.all([
+    const [ranking, rounds] = await Promise.all([
       rankingService.getGlobal().catch(() => []),
-      peladasService.list().catch(() => []),
+      roundsService.list().catch(() => []),
     ]);
-    const lastPelada = peladas.find((r) => r.status === 'finished') || peladas[0] || null;
-    const activePelada = peladas.find((r) => r.status === 'active') || null;
-    return { ranking: ranking.slice(0, 5), lastPelada, activePelada };
+    const lastRound = rounds.find((r) => r.status === 'finished') || rounds[0] || null;
+    const activeRound = rounds.find((r) => r.status === 'active') || null;
+    return { ranking: ranking.slice(0, 5), lastRound, activeRound };
   } catch {
-    return { ranking: [], lastPelada: null, activePelada: null };
+    return { ranking: [], lastRound: null, activeRound: null };
   }
 }
 
@@ -26,7 +26,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default async function HomePage() {
-  const { ranking, lastPelada, activePelada } = await getDashboardData();
+  const { ranking, activeRound } = await getDashboardData();
   const topScorer = ranking[0] ?? null;
   const topAssister = [...ranking].sort((a, b) => b.total_assists - a.total_assists)[0] ?? null;
   const topWinner = [...ranking].sort((a, b) => b.total_wins - a.total_wins)[0] ?? null;
@@ -34,9 +34,9 @@ export default async function HomePage() {
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* Active pelada banner */}
-      {activePelada && (
-        <Link href={`/peladas/${activePelada.id}`} className="block">
+      {/* Active round banner */}
+      {activeRound && (
+        <Link href={`/rounds/${activeRound.id}`} className="block">
           <div
             className="card card-hover p-5 relative overflow-hidden animate-pulse-glow"
             style={{ borderColor: 'var(--accent)' }}
@@ -55,10 +55,10 @@ export default async function HomePage() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
-                    🔴 Ao vivo
+                    🔴 Live
                   </p>
                   <p className="font-bold" style={{ color: 'var(--foreground)' }}>
-                    Pelada {new Date(activePelada.date).toLocaleDateString('pt-BR')}
+                    Round {new Date(activeRound.date).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -77,14 +77,14 @@ export default async function HomePage() {
               className="text-xs font-bold uppercase tracking-widest"
               style={{ color: 'var(--muted-light)' }}
             >
-              Destaques
+              Highlights
             </h2>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { emoji: '⚽', label: 'Artilheiro', player: topScorer?.nickname || topScorer?.name, value: topScorer?.total_goals ?? 0, unit: 'gols' },
-              { emoji: '🎯', label: 'Assistências', player: topAssister?.nickname || topAssister?.name, value: topAssister?.total_assists ?? 0, unit: 'assist' },
-              { emoji: '🏆', label: 'Vitórias', player: topWinner?.nickname || topWinner?.name, value: topWinner?.total_wins ?? 0, unit: 'vitórias' },
+              { emoji: '⚽', label: 'Top Scorer', player: topScorer?.nickname || topScorer?.name, value: topScorer?.total_goals ?? 0, unit: 'goals' },
+              { emoji: '🎯', label: 'Assists', player: topAssister?.nickname || topAssister?.name, value: topAssister?.total_assists ?? 0, unit: 'assists' },
+              { emoji: '🏆', label: 'Wins', player: topWinner?.nickname || topWinner?.name, value: topWinner?.total_wins ?? 0, unit: 'wins' },
             ].map(({ emoji, label, player, value, unit }, i) => (
               <div
                 key={label}
@@ -120,7 +120,7 @@ export default async function HomePage() {
             className="text-xs font-semibold transition-colors"
             style={{ color: 'var(--accent)' }}
           >
-            Ver tudo →
+            View all →
           </Link>
         </div>
 
@@ -128,10 +128,10 @@ export default async function HomePage() {
           <div className="card p-8 flex flex-col items-center gap-3 text-center">
             <Trophy className="w-10 h-10" style={{ color: 'var(--muted)' }} />
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
-              Nenhum jogador ainda.<br />Cadastre jogadores e inicie uma pelada!
+              No players registered yet.<br />Add players and start a round!
             </p>
-            <Link href="/jogadores" className="btn btn-primary btn-sm mt-1">
-              Cadastrar jogadores
+            <Link href="/players" className="btn btn-primary btn-sm mt-1">
+              Add players
             </Link>
           </div>
         ) : (
@@ -139,7 +139,7 @@ export default async function HomePage() {
             {ranking.map((entry, i) => (
               <Link
                 key={entry.player_id}
-                href={`/jogadores/${entry.player_id}`}
+                href={`/players/${entry.player_id}`}
                 className={`flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[var(--surface-hover)] animate-fade-in stagger-${i + 1} ${i < ranking.length - 1 ? 'border-b border-[var(--border-color)]' : ''}`}
               >
                 <RankBadge rank={i + 1} />
@@ -170,7 +170,7 @@ export default async function HomePage() {
 
       {/* Quick actions */}
       <section className="grid grid-cols-2 gap-3 animate-fade-in-up stagger-4">
-        <Link href="/peladas/nova" className="block">
+        <Link href="/rounds/new" className="block">
           <div className="card card-hover p-4 flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -179,12 +179,12 @@ export default async function HomePage() {
               <Calendar className="w-5 h-5" style={{ color: 'var(--accent)' }} />
             </div>
             <div>
-              <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Nova Pelada</p>
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>Criar sessão</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>New Round</p>
+              <p className="text-xs" style={{ color: 'var(--muted)' }}>Start match session</p>
             </div>
           </div>
         </Link>
-        <Link href="/jogadores" className="block">
+        <Link href="/players" className="block">
           <div className="card card-hover p-4 flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -193,8 +193,8 @@ export default async function HomePage() {
               <Users className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
             </div>
             <div>
-              <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Jogadores</p>
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>Gerenciar</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Players</p>
+              <p className="text-xs" style={{ color: 'var(--muted)' }}>Manage roster</p>
             </div>
           </div>
         </Link>

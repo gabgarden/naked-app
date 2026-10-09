@@ -1,12 +1,12 @@
 import { sql } from '../../database/postgres/client';
-import { Match } from '../../../core/domain/pelada/entities/Match';
-import { MatchEvent } from '../../../core/domain/pelada/entities/MatchEvent';
+import { Match } from '../../../core/domain/match/entities/Match';
+import { MatchEvent } from '../../../core/domain/match/entities/MatchEvent';
 import {
   IMatchRepository,
   MatchDetails,
-} from '../../../core/domain/pelada/repositories/IMatchRepository';
-import { Score } from '../../../core/domain/pelada/value-objects/Score';
-import { MatchStatus } from '../../../core/domain/pelada/value-objects/MatchStatus';
+} from '../../../core/domain/match/repositories/IMatchRepository';
+import { Score } from '../../../core/domain/match/value-objects/Score';
+import { MatchStatus } from '../../../core/domain/match/value-objects/MatchStatus';
 
 export class PostgresMatchRepository implements IMatchRepository {
   public async findById(id: string): Promise<Match | null> {

@@ -1,29 +1,29 @@
 import { Request, Response } from 'express';
 import { roundRepository } from '../../../infrastructure/di/container';
 
-export class PeladasController {
+export class RoundsController {
   async list(req: Request, res: Response) {
     try {
       const rounds = await roundRepository.findAll();
       res.json({ data: rounds });
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao buscar peladas.' });
+      res.status(500).json({ error: 'Error fetching rounds.' });
     }
   }
 
   async getById(req: Request, res: Response) {
     try {
       const round = await roundRepository.findByIdWithDetails(req.params.id);
-      if (!round) return res.status(404).json({ error: 'Pelada não encontrada.' });
+      if (!round) return res.status(404).json({ error: 'Round not found.' });
       res.json({ data: round });
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao buscar pelada.' });
+      res.status(500).json({ error: 'Error fetching round.' });
     }
   }
 
   async create(req: Request, res: Response) {
     const { date, notes, teams } = req.body;
-    if (!date) return res.status(400).json({ error: 'A data é obrigatória.' });
+    if (!date) return res.status(400).json({ error: 'Date is required.' });
 
     try {
       if (teams && Array.isArray(teams) && teams.length > 0) {
@@ -36,7 +36,7 @@ export class PeladasController {
       if (!result.success) return res.status(400).json({ error: result.error });
       res.status(201).json({ data: { roundId: result.roundId } });
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao criar pelada.' });
+      res.status(500).json({ error: 'Error creating round.' });
     }
   }
 
@@ -44,7 +44,7 @@ export class PeladasController {
     const { status } = req.body;
     const validStatuses = ['draft', 'active', 'finished'];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Status inválido.' });
+      return res.status(400).json({ error: 'Invalid status.' });
     }
     const result = await roundRepository.updateStatus(req.params.id, status);
     if (!result.success) return res.status(400).json({ error: result.error });
@@ -54,7 +54,7 @@ export class PeladasController {
   async updateTeamPlayers(req: Request, res: Response) {
     const { playerIds } = req.body;
     if (!Array.isArray(playerIds)) {
-      return res.status(400).json({ error: 'playerIds deve ser um array.' });
+      return res.status(400).json({ error: 'playerIds must be an array.' });
     }
     const result = await roundRepository.updateTeamPlayers(req.params.teamId, playerIds);
     if (!result.success) return res.status(400).json({ error: result.error });
@@ -62,4 +62,5 @@ export class PeladasController {
   }
 }
 
-export const peladasController = new PeladasController();
+export const roundsController = new RoundsController();
+

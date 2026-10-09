@@ -6,7 +6,7 @@ import { UserPlus, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { playersService } from '../../../services/players.service';
 
-export default function NovoJogadorPage() {
+export default function NewPlayerPage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('');
@@ -15,16 +15,16 @@ export default function NovoJogadorPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) { setError('O nome é obrigatório.'); return; }
+    if (!name.trim()) { setError('Name is required.'); return; }
 
     setLoading(true);
     setError('');
     try {
       await playersService.create({ name: name.trim(), nickname: nickname.trim() || undefined });
-      router.push('/jogadores');
+      router.push('/players');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao cadastrar jogador.');
+      setError(err instanceof Error ? err.message : 'Error registering player.');
     } finally {
       setLoading(false);
     }
@@ -33,9 +33,9 @@ export default function NovoJogadorPage() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Back */}
-      <Link href="/jogadores" className="flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
+      <Link href="/players" className="flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
         <ArrowLeft className="w-4 h-4" />
-        Voltar
+        Back
       </Link>
 
       <div>
@@ -43,10 +43,10 @@ export default function NovoJogadorPage() {
           className="text-2xl font-bold"
           style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
         >
-          Novo Jogador
+          New Player
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
-          Cadastre um jogador para usar nas peladas
+          Register a player to participate in rounds
         </p>
       </div>
 
@@ -54,12 +54,12 @@ export default function NovoJogadorPage() {
         <div className="card p-5 space-y-4">
           <div className="space-y-1.5">
             <label className="text-sm font-semibold" style={{ color: 'var(--foreground-muted)' }}>
-              Nome *
+              Full Name *
             </label>
             <input
               id="input-name"
               className="input"
-              placeholder="Nome completo"
+              placeholder="e.g. John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
@@ -69,12 +69,12 @@ export default function NovoJogadorPage() {
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold" style={{ color: 'var(--foreground-muted)' }}>
-              Apelido <span style={{ color: 'var(--muted)' }}>(opcional)</span>
+              Nickname <span style={{ color: 'var(--muted)' }}>(optional)</span>
             </label>
             <input
               id="input-nickname"
               className="input"
-              placeholder="Como é chamado nas peladas"
+              placeholder="e.g. Johnny"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
             />
@@ -91,14 +91,14 @@ export default function NovoJogadorPage() {
         </div>
 
         <button
-          id="btn-salvar-jogador"
+          id="btn-save-player"
           type="submit"
           disabled={loading}
           className="btn btn-primary btn-lg w-full"
           style={{ opacity: loading ? 0.7 : 1 }}
         >
           <UserPlus className="w-5 h-5" />
-          {loading ? 'Salvando...' : 'Cadastrar Jogador'}
+          {loading ? 'Saving...' : 'Register Player'}
         </button>
       </form>
     </div>

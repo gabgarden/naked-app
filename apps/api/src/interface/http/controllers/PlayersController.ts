@@ -7,28 +7,28 @@ export class PlayersController {
       const players = await playerRepository.findAll();
       res.json({ data: players });
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao buscar jogadores.' });
+      res.status(500).json({ error: 'Error fetching players.' });
     }
   }
 
   async getById(req: Request, res: Response) {
     try {
       const player = await playerRepository.findById(req.params.id);
-      if (!player) return res.status(404).json({ error: 'Jogador não encontrado.' });
+      if (!player) return res.status(404).json({ error: 'Player not found.' });
 
       const stats = await playerRepository.getStats(req.params.id);
       const history = await playerRepository.getRoundHistory(req.params.id);
 
       res.json({ data: { ...player, stats, history } });
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao buscar jogador.' });
+      res.status(500).json({ error: 'Error fetching player.' });
     }
   }
 
   async create(req: Request, res: Response) {
     const { name, nickname, avatar_url } = req.body;
     if (!name?.trim()) {
-      return res.status(400).json({ error: 'O nome é obrigatório.' });
+      return res.status(400).json({ error: 'Name is required.' });
     }
     const result = await playerRepository.create({ name, nickname, avatar_url });
     if (!result.success) return res.status(400).json({ error: result.error });

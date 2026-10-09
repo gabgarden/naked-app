@@ -5,33 +5,27 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   RoundWithDetails,
-  peladasService,
+  roundsService,
   TeamWithDetails,
   TeamPlayer,
-} from '../services/peladas.service';
-import { matchesService } from '../services/matches.service';
+} from '../services/rounds.service';
 import { formatDateBR, getInitials, getDisplayName } from '../lib/utils';
 import {
   ArrowLeft,
-  Calendar,
-  Flame,
-  CheckCircle2,
   Users,
   Swords,
   Plus,
-  Play,
-  RotateCw,
   ArrowRightLeft,
   X,
   ChevronRight,
 } from 'lucide-react';
 import { MatchCreator } from './MatchCreator';
 
-interface PeladaDetailClientProps {
+interface RoundDetailClientProps {
   initialRound: RoundWithDetails;
 }
 
-export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
+export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
   const router = useRouter();
   const [round, setRound] = useState<RoundWithDetails>(initialRound);
   const [loading, setLoading] = useState(false);
@@ -54,20 +48,20 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
   // Status transitions
   async function handleStatusChange(newStatus: 'active' | 'finished') {
     if (newStatus === 'finished') {
-      if (!confirm('Deseja encerrar esta pelada? Nenhuma nova partida poderá ser alterada.')) {
+      if (!confirm('Do you want to end this round? No matches can be edited after ending.')) {
         return;
       }
     }
 
     setLoading(true);
     try {
-      await peladasService.updateStatus(round.id, newStatus);
-      const updated = await peladasService.getById(round.id);
+      await roundsService.updateStatus(round.id, newStatus);
+      const updated = await roundsService.getById(round.id);
       setRound(updated);
       setTeamsState(updated.teams);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar status.');
+      setError(err instanceof Error ? err.message : 'Error updating status.');
     } finally {
       setLoading(false);
     }
@@ -110,10 +104,9 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
     setError('');
 
     try {
-      // Update each team's players in parallel
       await Promise.all(
         teamsState.map((team) =>
-          peladasService.updateTeamPlayers(
+          roundsService.updateTeamPlayers(
             round.id,
             team.id,
             team.players.map((p) => p.id),
@@ -121,13 +114,13 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
         ),
       );
 
-      const updated = await peladasService.getById(round.id);
+      const updated = await roundsService.getById(round.id);
       setRound(updated);
       setTeamsState(updated.teams);
       setShowReallocation(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao remanejar equipes.');
+      setError(err instanceof Error ? err.message : 'Error reallocating squads.');
     } finally {
       setLoading(false);
     }
@@ -141,14 +134,14 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <Link
-          href="/peladas"
+          href="/rounds"
           className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
           style={{ background: 'var(--surface-hover)', color: 'var(--muted)' }}
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
 
-        {/* Pelada status button / badge */}
+        {/* Status button / badge */}
         <div className="flex items-center gap-2">
           {!isFinished && (
             <button
@@ -163,7 +156,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                 color: isActive ? 'var(--danger)' : undefined,
               }}
             >
-              {isActive ? 'Encerrar Pelada' : 'Ativar Pelada'}
+              {isActive ? 'End Round' : 'Activate Round'}
             </button>
           )}
 
@@ -183,7 +176,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
             }}
           >
             {isActive && <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />}
-            {isActive ? 'Ao Vivo' : isFinished ? 'Finalizada' : 'Rascunho'}
+            {isActive ? 'Live' : isFinished ? 'Finished' : 'Draft'}
           </div>
         </div>
       </div>
@@ -216,7 +209,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
               className="text-xs font-bold uppercase tracking-wider"
               style={{ color: 'var(--accent)' }}
             >
-              Pelada
+              Round
             </span>
             <h1
               className="text-2xl font-bold mt-0.5"
@@ -233,10 +226,10 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
 
           <div className="text-right">
             <span className="text-xs font-bold block" style={{ color: 'var(--foreground)' }}>
-              {round.teams.length} Times
+              {round.teams.length} Teams
             </span>
             <span className="text-xs block" style={{ color: 'var(--muted)' }}>
-              {round.matches.length} Partidas
+              {round.matches.length} Matches
             </span>
           </div>
         </div>
@@ -250,7 +243,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
             style={{ color: 'var(--muted)' }}
           >
             <Users className="w-4 h-4 text-[var(--accent)]" />
-            Times e Escalações
+            Teams & Squads
           </h2>
 
           {!isFinished && (
@@ -261,7 +254,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
               style={{ color: 'var(--accent)', borderColor: 'var(--accent)' }}
             >
               <ArrowRightLeft className="w-3.5 h-3.5" />
-              Remanejar Times
+              Reallocate Teams
             </button>
           )}
         </div>
@@ -282,14 +275,14 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                     className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-md"
                     style={{ background: 'var(--surface-hover)', color: 'var(--muted)' }}
                   >
-                    {team.players.length} atletas
+                    {team.players.length} players
                   </span>
                 </div>
 
                 <div className="space-y-1.5 max-h-48 overflow-y-auto">
                   {team.players.length === 0 ? (
                     <p className="text-xs italic py-2" style={{ color: 'var(--muted)' }}>
-                      Nenhum jogador alocado
+                      No players assigned
                     </p>
                   ) : (
                     team.players.map((p) => (
@@ -329,7 +322,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
             style={{ color: 'var(--muted)' }}
           >
             <Swords className="w-4 h-4 text-[var(--accent)]" />
-            Partidas da Pelada
+            Matches
           </h2>
 
           {!isFinished && (
@@ -339,7 +332,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
               className="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-              Nova Partida
+              New Match
             </button>
           )}
         </div>
@@ -347,7 +340,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
         {round.matches.length === 0 ? (
           <div className="card p-8 text-center space-y-3">
             <p className="text-xs" style={{ color: 'var(--muted)' }}>
-              Nenhuma partida cadastrada para esta pelada.
+              No matches registered for this round yet.
             </p>
             {!isFinished && (
               <button
@@ -356,7 +349,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                 className="btn btn-primary text-xs"
               >
                 <Plus className="w-4 h-4" />
-                Criar Primeira Partida
+                Create First Match
               </button>
             )}
           </div>
@@ -371,7 +364,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
               return (
                 <Link
                   key={m.id}
-                  href={`/peladas/${round.id}/partidas/${m.id}`}
+                  href={`/rounds/${round.id}/matches/${m.id}`}
                   className="card card-hover p-4 block transition-all"
                   style={{
                     borderColor: matchIsLive ? 'var(--accent)' : 'var(--border-color)',
@@ -385,11 +378,11 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                         style={{ backgroundColor: teamA?.color || 'var(--accent)' }}
                       />
                       <span className="font-bold text-xs truncate" style={{ color: 'var(--foreground)' }}>
-                        {teamA?.name || 'Time A'}
+                        {teamA?.name || 'Team A'}
                       </span>
                     </div>
 
-                    {/* Placar & Status */}
+                    {/* Score & Status */}
                     <div className="flex flex-col items-center px-4">
                       <div className="flex items-center gap-2">
                         <span
@@ -419,14 +412,14 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                             : 'var(--muted)',
                         }}
                       >
-                        {matchIsLive ? '● Ao Vivo' : matchIsFinished ? 'Finalizada' : 'Agendada'}
+                        {matchIsLive ? '● Live' : matchIsFinished ? 'Finished' : 'Scheduled'}
                       </span>
                     </div>
 
                     {/* Team B */}
                     <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
                       <span className="font-bold text-xs truncate text-right" style={{ color: 'var(--foreground)' }}>
-                        {teamB?.name || 'Time B'}
+                        {teamB?.name || 'Team B'}
                       </span>
                       <span
                         className="w-3 h-3 rounded-full flex-shrink-0"
@@ -471,10 +464,10 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
             >
               <div>
                 <h3 className="font-bold text-sm" style={{ color: 'var(--foreground)' }}>
-                  Remanejamento de Equipes
+                  Team Reallocation
                 </h3>
                 <p className="text-[11px]" style={{ color: 'var(--muted)' }}>
-                  Clique em um jogador e selecione o novo time dele
+                  Click on a player and select their destination team
                 </p>
               </div>
 
@@ -495,14 +488,14 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                 style={{ background: 'rgba(249,115,22,0.15)', color: 'var(--accent)' }}
               >
                 <span>
-                  Movendo <strong>{getDisplayName(selectedPlayerForMove.player.name, selectedPlayerForMove.player.nickname)}</strong>: selecione o time de destino
+                  Moving <strong>{getDisplayName(selectedPlayerForMove.player.name, selectedPlayerForMove.player.nickname)}</strong>: select destination team
                 </span>
                 <button
                   type="button"
                   onClick={() => setSelectedPlayerForMove(null)}
                   className="text-[10px] uppercase font-bold underline"
                 >
-                  Cancelar
+                  Cancel
                 </button>
               </div>
             )}
@@ -540,11 +533,11 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
 
                       {isTarget ? (
                         <span className="text-[10px] font-bold text-[var(--accent)]">
-                          Toque para transferir aqui ↵
+                          Tap to transfer here ↵
                         </span>
                       ) : (
                         <span className="text-[10px] font-semibold" style={{ color: 'var(--muted)' }}>
-                          {team.players.length} atletas
+                          {team.players.length} players
                         </span>
                       )}
                     </div>
@@ -582,7 +575,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
 
                       {team.players.length === 0 && (
                         <span className="text-xs italic py-1" style={{ color: 'var(--muted)' }}>
-                          Vazio
+                          Empty
                         </span>
                       )}
                     </div>
@@ -601,7 +594,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                 onClick={() => setShowReallocation(false)}
                 className="btn btn-secondary flex-1 text-xs"
               >
-                Descartar
+                Discard
               </button>
               <button
                 type="button"
@@ -609,7 +602,7 @@ export function PeladaDetailClient({ initialRound }: PeladaDetailClientProps) {
                 disabled={loading}
                 className="btn btn-primary flex-[2] text-xs"
               >
-                {loading ? 'Salvando...' : 'Confirmar Remanejamento'}
+                {loading ? 'Saving...' : 'Confirm Reallocation'}
               </button>
             </div>
           </div>

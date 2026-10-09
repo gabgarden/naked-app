@@ -7,10 +7,10 @@ import Header from '../components/Header';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Pelada App — Gerencie sua pelada',
-  description: 'Controle partidas, times, gols e estatísticas da sua pelada de futebol.',
+  title: 'Naked App — Match & Player Tracker',
+  description: 'Track matches, squads, goals, and player stats cleanly.',
   manifest: '/manifest.json',
-  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Pelada' },
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Naked App' },
 };
 
 export const viewport: Viewport = {
@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={inter.variable}>
+    <html lang="en" className={inter.variable}>
       <body>
         <div className="min-h-screen flex flex-col">
           <Header />

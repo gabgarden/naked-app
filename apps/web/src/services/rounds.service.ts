@@ -49,13 +49,16 @@ export interface CreateRoundPayload {
   }[];
 }
 
-export const peladasService = {
-  list: () => apiGet<Round[]>('/api/peladas'),
-  getById: (id: string) => apiGet<RoundWithDetails>(`/api/peladas/${id}`),
+export const roundsService = {
+  list: () => apiGet<Round[]>('/api/rounds'),
+  getById: (id: string) => apiGet<RoundWithDetails>(`/api/rounds/${id}`),
   create: (data: CreateRoundPayload) =>
-    apiPost<{ roundId: string }>('/api/peladas', data),
+    apiPost<{ roundId: string }>('/api/rounds', data),
   updateStatus: (id: string, status: string) =>
-    apiPatch(`/api/peladas/${id}/status`, { status }),
+    apiPatch(`/api/rounds/${id}/status`, { status }),
   updateTeamPlayers: (roundId: string, teamId: string, playerIds: string[]) =>
-    apiPatch(`/api/peladas/${roundId}/teams/${teamId}/players`, { playerIds }),
+    apiPatch(`/api/rounds/${roundId}/teams/${teamId}/players`, { playerIds }),
 };
+
+// Compatibility export
+export const peladasService = roundsService;

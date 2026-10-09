@@ -17,7 +17,7 @@ export function PlayerForm({ player }: { player?: Player }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
-      setError('O nome é obrigatório.');
+      setError('Name is required.');
       return;
     }
 
@@ -37,10 +37,10 @@ export function PlayerForm({ player }: { player?: Player }) {
         });
       }
 
-      router.push('/jogadores');
+      router.push('/players');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar o jogador.');
+      setError(err instanceof Error ? err.message : 'An error occurred while saving the player.');
     } finally {
       setLoading(false);
     }
@@ -48,17 +48,17 @@ export function PlayerForm({ player }: { player?: Player }) {
 
   async function handleDelete() {
     if (!player) return;
-    if (!confirm(`Tem certeza que deseja excluir ${player.name}? Os registros históricos também serão removidos.`)) {
+    if (!confirm(`Are you sure you want to delete ${player.name}? Historical records will also be removed.`)) {
       return;
     }
 
     setLoading(true);
     try {
       await playersService.delete(player.id);
-      router.push('/jogadores');
+      router.push('/players');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao deletar jogador.');
+      setError(err instanceof Error ? err.message : 'Error deleting player.');
       setLoading(false);
     }
   }
@@ -81,14 +81,14 @@ export function PlayerForm({ player }: { player?: Player }) {
 
         <div className="space-y-1.5">
           <label className="text-sm font-semibold" style={{ color: 'var(--foreground-muted)' }}>
-            Nome Completo *
+            Full Name *
           </label>
           <input
             id="player-name"
             className="input"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ex: Neymar Júnior"
+            placeholder="e.g. John Doe"
             required
             autoFocus
           />
@@ -96,14 +96,14 @@ export function PlayerForm({ player }: { player?: Player }) {
 
         <div className="space-y-1.5">
           <label className="text-sm font-semibold" style={{ color: 'var(--foreground-muted)' }}>
-            Apelido <span style={{ color: 'var(--muted)' }}>(opcional)</span>
+            Nickname <span style={{ color: 'var(--muted)' }}>(optional)</span>
           </label>
           <input
             id="player-nickname"
             className="input"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            placeholder="Ex: Ney"
+            placeholder="e.g. Johnny"
           />
         </div>
       </div>
@@ -116,7 +116,7 @@ export function PlayerForm({ player }: { player?: Player }) {
           style={{ opacity: loading ? 0.7 : 1 }}
         >
           <UserCheck className="w-5 h-5" />
-          {loading ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Cadastrar Jogador'}
+          {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Register Player'}
         </button>
 
         {isEditing && (
@@ -128,7 +128,7 @@ export function PlayerForm({ player }: { player?: Player }) {
             style={{ color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.25)' }}
           >
             <Trash2 className="w-4 h-4" />
-            Excluir Jogador
+            Delete Player
           </button>
         )}
       </div>

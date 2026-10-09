@@ -26,11 +26,11 @@ export function MatchCreator({ round }: MatchCreatorProps) {
 
   async function handleStart() {
     if (!teamAId || !teamBId) {
-      setError('Selecione os dois times para iniciar a partida.');
+      setError('Select both teams to start the match.');
       return;
     }
     if (teamAId === teamBId) {
-      setError('Os times adversários devem ser diferentes.');
+      setError('Opponent teams must be different.');
       return;
     }
 
@@ -46,9 +46,9 @@ export function MatchCreator({ round }: MatchCreatorProps) {
         matchOrder: order,
       });
 
-      router.push(`/peladas/${round.id}/partidas/${res.matchId}`);
+      router.push(`/rounds/${round.id}/matches/${res.matchId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar partida.');
+      setError(err instanceof Error ? err.message : 'Error creating match.');
       setLoading(false);
     }
   }
@@ -57,7 +57,7 @@ export function MatchCreator({ round }: MatchCreatorProps) {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
         <Link
-          href={`/peladas/${round.id}`}
+          href={`/rounds/${round.id}`}
           className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
           style={{ background: 'var(--surface-hover)', color: 'var(--muted)' }}
         >
@@ -68,10 +68,10 @@ export function MatchCreator({ round }: MatchCreatorProps) {
             className="text-xl font-bold"
             style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
           >
-            Nova Partida
+            New Match
           </h1>
           <p className="text-xs" style={{ color: 'var(--muted)' }}>
-            Selecione o confronto da vez
+            Select the two teams facing each other
           </p>
         </div>
       </div>
@@ -93,7 +93,7 @@ export function MatchCreator({ round }: MatchCreatorProps) {
         {/* Team A */}
         <div className="w-full space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider pl-1" style={{ color: 'var(--muted)' }}>
-            Time 1
+            Team 1
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {teams.map((t) => {
@@ -139,7 +139,7 @@ export function MatchCreator({ round }: MatchCreatorProps) {
         {/* Team B */}
         <div className="w-full space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider pl-1" style={{ color: 'var(--muted)' }}>
-            Time 2
+            Team 2
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {teams.map((t) => {
@@ -183,8 +183,9 @@ export function MatchCreator({ round }: MatchCreatorProps) {
         style={{ opacity: loading || !teamAId || !teamBId ? 0.5 : 1 }}
       >
         <Play className="w-5 h-5 fill-current" />
-        {loading ? 'Iniciando...' : 'Apitar Início da Partida'}
+        {loading ? 'Starting...' : 'Start Match'}
       </button>
     </div>
   );
 }
+

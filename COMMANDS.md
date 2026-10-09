@@ -1,4 +1,5 @@
-# ⚡ Comandos Rápidos — Pelada App v2
+# ⚡ Comandos Rápidos — Naked App
+# Repositório: https://github.com/gabgarden/naked-app
 
 ## 💻 Desenvolvimento Local
 
@@ -36,20 +37,20 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 
 ```bash
 # Copiar o template
-sudo cp infrastructure/nginx/vps-host.conf /etc/nginx/sites-available/pelada.conf
+sudo cp infrastructure/nginx/vps-host.conf /etc/nginx/sites-available/naked.conf
 
 # Ajustar o domínio
-sudo nano /etc/nginx/sites-available/pelada.conf
+sudo nano /etc/nginx/sites-available/naked.conf
 
 # Ativar o site
-sudo ln -s /etc/nginx/sites-available/pelada.conf /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/naked.conf /etc/nginx/sites-enabled/
 
 # Testar e reiniciar
 sudo nginx -t
 sudo systemctl reload nginx
 
 # Emitir SSL
-sudo certbot --nginx -d pelada.seudominio.com.br
+sudo certbot --nginx -d naked.seudominio.com.br
 ```
 
 ---
@@ -79,5 +80,5 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 
 ```bash
 # Dump do PostgreSQL
-docker exec -t pelada-db pg_dump -U postgres pelada_app > backup_pelada_$(date +%Y%m%d_%H%M%S).sql
+docker exec -t naked-db pg_dump -U postgres naked_app > backup_naked_$(date +%Y%m%d_%H%M%S).sql
 ```

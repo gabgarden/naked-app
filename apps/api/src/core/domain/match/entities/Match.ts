@@ -65,11 +65,11 @@ export class Match {
   }
 
   /**
-   * Inicia a partida — muda status para in_progress e registra horário
+   * Starts the match — changes status to in_progress and records timestamp
    */
   public start(): Result<void> {
     if (!this._status.isPending()) {
-      return Result.fail('A partida já foi iniciada ou finalizada.');
+      return Result.fail('Match has already been started or finished.');
     }
     this._status = MatchStatus.inProgress();
     this._startedAt = new Date();
@@ -77,7 +77,7 @@ export class Match {
   }
 
   /**
-   * Registra um gol e atualiza o placar
+   * Registers a goal and increments the score
    */
   public registerGoal(
     eventId: string,
@@ -87,11 +87,11 @@ export class Match {
     minute?: number | null,
   ): Result<MatchEvent> {
     if (this._status.isFinished()) {
-      return Result.fail('Não é possível registrar gols em uma partida já finalizada.');
+      return Result.fail('Cannot register goals in a finished match.');
     }
 
     if (teamId !== this.teamAId && teamId !== this.teamBId) {
-      return Result.fail('O time informado não pertence a esta partida.');
+      return Result.fail('The provided team does not belong to this match.');
     }
 
     const event = new MatchEvent({
@@ -117,12 +117,12 @@ export class Match {
   }
 
   /**
-   * Remove um evento de gol e ajusta o placar
+   * Removes a goal event and decrements the score
    */
   public removeEvent(eventId: string, teamId: string): Result<void> {
     const index = this._events.findIndex((e) => e.id === eventId);
     if (index === -1) {
-      return Result.fail('Evento não encontrado nesta partida.');
+      return Result.fail('Event not found in this match.');
     }
 
     this._events.splice(index, 1);
@@ -137,11 +137,11 @@ export class Match {
   }
 
   /**
-   * Finaliza a partida
+   * Finishes the match
    */
   public finish(): Result<void> {
     if (this._status.isFinished()) {
-      return Result.fail('A partida já está finalizada.');
+      return Result.fail('Match is already finished.');
     }
     this._status = MatchStatus.create('finished');
     this._finishedAt = new Date();

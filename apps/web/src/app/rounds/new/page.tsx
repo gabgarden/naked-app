@@ -13,14 +13,14 @@ async function getPlayers(): Promise<Player[]> {
   }
 }
 
-export default async function NovaPeladaPage() {
+export default async function NewRoundPage() {
   const players = await getPlayers();
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
         <Link
-          href="/peladas"
+          href="/rounds"
           className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
           style={{ background: 'var(--surface-hover)', color: 'var(--muted)' }}
         >
@@ -31,10 +31,10 @@ export default async function NovaPeladaPage() {
             className="text-2xl font-bold"
             style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
           >
-            Nova Pelada
+            New Round
           </h1>
           <p className="text-xs" style={{ color: 'var(--muted)' }}>
-            Configure a data, selecione os atletas e divida os times
+            Set the date, select players, and configure teams
           </p>
         </div>
       </div>

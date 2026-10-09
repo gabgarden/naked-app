@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation';
 import { Home, Users, Calendar, Trophy } from 'lucide-react';
 
 const navItems = [
-  { href: '/', label: 'Início', Icon: Home },
-  { href: '/jogadores', label: 'Jogadores', Icon: Users },
-  { href: '/peladas', label: 'Peladas', Icon: Calendar },
+  { href: '/', label: 'Home', Icon: Home },
+  { href: '/players', label: 'Players', Icon: Users },
+  { href: '/rounds', label: 'Rounds', Icon: Calendar },
   { href: '/ranking', label: 'Ranking', Icon: Trophy },
 ];
 

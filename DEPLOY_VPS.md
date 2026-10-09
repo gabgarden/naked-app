@@ -23,7 +23,7 @@ Para não conflitar com nenhum outro projeto já hospedado na VPS, o **Naked App
 ## 🏛️ 2. Topologia de Nginx (Duas Camadas)
 
 ```
-Internet / Usuários (https://pelada.seudominio.com.br)
+Internet / Usuários (https://naked.seudominio.com.br)
          │
          ▼
 [1] NGINX DO HOST DA VPS (Portas 80 / 443)
@@ -31,13 +31,13 @@ Internet / Usuários (https://pelada.seudominio.com.br)
     └── Faz proxy reverso para http://127.0.0.1:8084
          │
          ▼
-[2] NGINX DO DOCKER (Container 'pelada-nginx' na porta :8084)
+[2] NGINX DO DOCKER (Container 'naked-nginx' na porta :8084)
     ├── /api/   ──► Container Express API (http://api:3001)
     ├── /health ──► Container Express API (http://api:3001/health)
     └── /       ──► Container Next.js Web (http://web:3000)
          │
          ▼
-[3] BANCO DE DADOS (Container 'pelada-db')
+[3] BANCO DE DADOS (Container 'naked-db')
     └── PostgreSQL 16 isolado na rede interna Docker (porta 5432 NÃO exposta na internet)
 ```
 
@@ -59,8 +59,8 @@ Navegue até a pasta de projetos da VPS e clone o repositório:
 
 ```bash
 cd /root/projects # ou o diretório onde ficam seus projetos na VPS
-git clone https://github.com/SEU_USUARIO/liga-da-pelada.git
-cd liga-da-pelada
+git clone https://github.com/gabgarden/naked-app.git
+cd naked-app
 ```
 
 *(Se o repositório já estiver clonado, apenas atualize:)*
@@ -89,7 +89,7 @@ Defina uma senha forte em `POSTGRES_PASSWORD`:
 PORT=8084
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=DefinaUmaSenhaSuperForteAqui123!
-POSTGRES_DB=pelada_app
+POSTGRES_DB=naked_app
 NEXT_PUBLIC_API_URL=
 INTERNAL_API_URL=http://api:3001
 CORS_ORIGIN=*
@@ -112,10 +112,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
 ```
 
 Você verá:
-- `pelada-db` (healthy)
-- `pelada-api` (running)
-- `pelada-web` (running)
-- `pelada-nginx` (0.0.0.0:8084->80/tcp)
+- `naked-db` (healthy)
+- `naked-api` (running)
+- `naked-web` (running)
+- `naked-nginx` (0.0.0.0:8084->80/tcp)
 
 #### Testar localmente no terminal da VPS:
 ```bash
@@ -130,7 +130,7 @@ curl http://127.0.0.1:8084/health
 Crie o arquivo de configuração do site no Nginx da VPS:
 
 ```bash
-sudo nano /etc/nginx/sites-available/pelada.conf
+sudo nano /etc/nginx/sites-available/naked.conf
 ```
 
 Cole a seguinte configuração (ajuste o `server_name` para o seu domínio ou subdomínio):
@@ -138,7 +138,7 @@ Cole a seguinte configuração (ajuste o `server_name` para o seu domínio ou su
 ```nginx
 server {
     listen 80;
-    server_name pelada.seudominio.com.br; # <-- Coloque seu domínio ou subdomínio aqui
+    server_name naked.seudominio.com.br; # <-- Coloque seu domínio ou subdomínio aqui
 
     client_max_body_size 20m;
 
@@ -161,7 +161,7 @@ server {
 Ative o site criando o link simbólico em `sites-enabled`:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/pelada.conf /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/naked.conf /etc/nginx/sites-enabled/
 ```
 
 Valide a sintaxe do Nginx:
@@ -182,7 +182,7 @@ sudo systemctl reload nginx
 Com o DNS do seu domínio já apontado para o IP da VPS (`179.198.120.172`), emita o certificado SSL:
 
 ```bash
-sudo certbot --nginx -d pelada.seudominio.com.br
+sudo certbot --nginx -d naked.seudominio.com.br
 ```
 
 O Certbot irá configurar o redirecionamento automático de HTTP para HTTPS e renovar os certificados automaticamente via `certbot.timer`.
@@ -222,7 +222,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 ### Atualizar a Aplicação (Após novos commits no Git)
 
 ```bash
-cd /root/projects/liga-da-pelada
+cd /root/projects/naked-app
 git pull origin main
 docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
 ```
@@ -231,10 +231,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 
 ```bash
 # Gerar dump do banco
-docker exec -t pelada-db pg_dump -U postgres pelada_app > backup_pelada_$(date +%Y%m%d_%H%M%S).sql
+docker exec -t naked-db pg_dump -U postgres naked_app > backup_naked_$(date +%Y%m%d_%H%M%S).sql
 
 # Restaurar dump do banco (se necessário)
-cat backup_pelada_YYYYMMDD_HHMMSS.sql | docker exec -i pelada-db psql -U postgres -d pelada_app
+cat backup_naked_YYYYMMDD_HHMMSS.sql | docker exec -i naked-db psql -U postgres -d naked_app
 ```
 
 ---
@@ -243,6 +243,6 @@ cat backup_pelada_YYYYMMDD_HHMMSS.sql | docker exec -i pelada-db psql -U postgre
 
 - [`docker-compose.prod.yml`](file:///c:/Users/garde/Desktop/projects/bq/liga-da-pelada/docker-compose.prod.yml): Overrides de produção com Nginx gateway na porta 8084 e DB protegido.
 - [`infrastructure/nginx/default.conf`](file:///c:/Users/garde/Desktop/projects/bq/liga-da-pelada/infrastructure/nginx/default.conf): Nginx de borda do container que encaminha `/api/` para a API e `/` para o Next.js.
-- [`infrastructure/nginx/vps-host.conf`](file:///c:/Users/garde/Desktop/projects/bq/liga-da-pelada/infrastructure/nginx/vps-host.conf): Template pronto para colar no Nginx do host `/etc/nginx/sites-available/pelada.conf`.
+- [`infrastructure/nginx/vps-host.conf`](file:///c:/Users/garde/Desktop/projects/bq/liga-da-pelada/infrastructure/nginx/vps-host.conf): Template pronto para colar no Nginx do host `/etc/nginx/sites-available/naked.conf`.
 - [`.env.production.example`](file:///c:/Users/garde/Desktop/projects/bq/liga-da-pelada/.env.production.example): Modelo com todas as variáveis prontas.
 - [`COMMANDS.md`](file:///c:/Users/garde/Desktop/projects/bq/liga-da-pelada/COMMANDS.md): Cola rápida com comandos one-liners.

@@ -1,5 +1,5 @@
 import { Result } from '../../../domain/shared/Result';
-import { IMatchRepository } from '../../../domain/pelada/repositories/IMatchRepository';
+import { IMatchRepository } from '../../../domain/match/repositories/IMatchRepository';
 import { IPlayerRepository } from '../../../domain/player/repositories/IPlayerRepository';
 
 interface FinishMatchInput {
@@ -15,7 +15,7 @@ export class FinishMatchUseCase {
   public async execute(input: FinishMatchInput): Promise<Result<void>> {
     const match = await this.matchRepository.findById(input.matchId);
     if (!match) {
-      return Result.fail('Partida não encontrada.');
+      return Result.fail('Match not found.');
     }
 
     const finishResult = match.finish();

@@ -7,7 +7,7 @@ export class RankingController {
       const ranking = await rankingRepository.getGlobalRanking();
       res.json({ data: ranking });
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao buscar ranking.' });
+      res.status(500).json({ error: 'Error fetching ranking.' });
     }
   }
 }

@@ -1,5 +1,5 @@
 import { Result } from '../../../domain/shared/Result';
-import { IMatchRepository } from '../../../domain/pelada/repositories/IMatchRepository';
+import { IMatchRepository } from '../../../domain/match/repositories/IMatchRepository';
 
 interface DeleteGoalEventInput {
   matchId: string;
@@ -13,7 +13,7 @@ export class DeleteGoalEventUseCase {
   public async execute(input: DeleteGoalEventInput): Promise<Result<void>> {
     const match = await this.matchRepository.findById(input.matchId);
     if (!match) {
-      return Result.fail('Partida não encontrada.');
+      return Result.fail('Match not found.');
     }
 
     const removeResult = match.removeEvent(input.eventId, input.teamId);

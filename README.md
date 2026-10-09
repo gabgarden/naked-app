@@ -1,6 +1,7 @@
-# ⚽ Pelada App v2
+# ⚽ Naked App
+# Repositório: https://github.com/gabgarden/naked-app
 
-Sistema moderno e dinâmico de gestão de peladas avulsas com acompanhamento de partidas em tempo real, remanejamento dinâmico de equipes e ranking geral acumulado de atletas.
+Sistema moderno e dinâmico de gestão de partidas e peladas avulsas com acompanhamento de jogos em tempo real, remanejamento dinâmico de equipes e ranking geral acumulado de atletas.
 
 Construído sob os princípios de **Clean Architecture**, **DDD (Domain-Driven Design)** e **SOLID**, com total segregação entre **Frontend** e **Backend REST API**.
 
@@ -17,13 +18,13 @@ Construído sob os princípios de **Clean Architecture**, **DDD (Domain-Driven D
 ## 🏗️ Arquitetura do Sistema
 
 ```
-liga-da-pelada/
+naked-app/
 ├── apps/
 │   ├── api/                      # Backend REST API (Express + TypeScript + PostgreSQL)
 │   │   ├── src/
 │   │   │   ├── core/
 │   │   │   │   ├── domain/       # Entidades, Value Objects, Interfaces de Repositório (DDD)
-│   │   │   │   │   ├── pelada/   # Match, MatchEvent, Round, Team, Score, MatchStatus
+│   │   │   │   │   ├── match/    # Match, MatchEvent, Round, Team, Score, MatchStatus
 │   │   │   │   │   ├── player/   # Player, IPlayerRepository
 │   │   │   │   │   └── shared/   # Result pattern
 │   │   │   │   └── application/  # Casos de Uso (StartMatch, RegisterGoal, FinishMatch, etc.)
@@ -33,13 +34,14 @@ liga-da-pelada/
 │   │
 │   └── web/                      # Frontend (Next.js 16 + React 19 + TailwindCSS)
 │       ├── src/
-│       │   ├── app/              # App Router (Início, Jogadores, Peladas, Partida Ao Vivo, Ranking)
-│       │   ├── components/       # Componentes (MatchLiveBoard, RoundCreator, MatchCreator, etc.)
-│       │   ├── services/         # Clientes tipados de consumo da API REST
+│       │   ├── app/              # App Router (Home, Players, Rounds, Live Match, Ranking)
+│       │   ├── components/       # Componentes (MatchLiveBoard, RoundCreator, MatchCreator, RoundDetailClient, etc.)
+│       │   ├── services/         # Clientes tipados de consumo da API REST (rounds, matches, players, ranking)
 │       │   └── lib/              # Utilitários de formatação e cálculos
 │       └── Dockerfile
 │
 ├── docker-compose.yml            # Orquestração completa (Postgres + API + Web + Adminer)
+├── docker-compose.prod.yml       # Overrides de produção com Nginx gateway na porta 8084
 └── package.json                  # Workspaces e scripts de inicialização
 ```
 
@@ -84,14 +86,14 @@ npm run dev:web
 ## 🌟 Funcionalidades Principais
 
 1. **Gestão de Atletas:** Cadastro simples de jogadores (nome e apelido). Estatísticas acumuladas e perfil detalhado por atleta com taxa de vitória, gols e assistências.
-2. **Criação de Pelada Simples:**
-   - Seleção da data da pelada.
+2. **Criação de Rodada/Pelada Simples:**
+   - Seleção da data da sessão.
    - Escolha dos atletas presentes (com possibilidade de cadastrar novos jogadores na hora sem sair do fluxo).
    - Divisão flexível de equipes (2 ou mais times personalizáveis).
 3. **Controle em Tempo Real (Live Board):**
    - Cronômetro configurável de partida (iniciar, pausar, resetar).
    - Registro de gols com apontamento de autor e assistência (ou gol individual).
    - Histórico e anulação de gols em tempo real.
-4. **Remanejamento de Equipes:** Troca de jogadores entre times a qualquer momento durante a sessão da pelada.
+4. **Remanejamento de Equipes:** Troca de jogadores entre times a qualquer momento durante a sessão ativa.
 5. **Cálculo Automático de Estatísticas:** Ao finalizar cada partida, vitórias, empates, derrotas, gols e assistências são persistidos e totalizados no ranking geral e histórico de rodadas.
 6. **Ranking Geral:** Pódio dos 3 primeiros colocados com medalhas estilizadas e tabela completa de classificação.

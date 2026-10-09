@@ -1,12 +1,12 @@
 import { v4 as uuid } from 'uuid';
 import { sql } from '../../database/postgres/client';
-import { Round } from '../../../core/domain/pelada/entities/Round';
+import { Round } from '../../../core/domain/match/entities/Round';
 import {
   CreateRoundData,
   CreateTeamData,
   IRoundRepository,
   RoundWithDetails,
-} from '../../../core/domain/pelada/repositories/IRoundRepository';
+} from '../../../core/domain/match/repositories/IRoundRepository';
 
 export class PostgresRoundRepository implements IRoundRepository {
   public async findAll(): Promise<Round[]> {

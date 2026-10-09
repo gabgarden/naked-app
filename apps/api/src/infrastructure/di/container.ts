@@ -2,10 +2,10 @@ import { PostgresPlayerRepository } from '../repositories/postgres/PostgresPlaye
 import { PostgresMatchRepository } from '../repositories/postgres/PostgresMatchRepository';
 import { PostgresRoundRepository } from '../repositories/postgres/PostgresRoundRepository';
 import { PostgresRankingRepository } from '../repositories/postgres/PostgresRankingRepository';
-import { RegisterGoalUseCase } from '../../core/application/pelada/use-cases/RegisterGoalUseCase';
-import { DeleteGoalEventUseCase } from '../../core/application/pelada/use-cases/DeleteGoalEventUseCase';
-import { FinishMatchUseCase } from '../../core/application/pelada/use-cases/FinishMatchUseCase';
-import { StartMatchUseCase } from '../../core/application/pelada/use-cases/StartMatchUseCase';
+import { RegisterGoalUseCase } from '../../core/application/match/use-cases/RegisterGoalUseCase';
+import { DeleteGoalEventUseCase } from '../../core/application/match/use-cases/DeleteGoalEventUseCase';
+import { FinishMatchUseCase } from '../../core/application/match/use-cases/FinishMatchUseCase';
+import { StartMatchUseCase } from '../../core/application/match/use-cases/StartMatchUseCase';
 
 // Repositories (singletons)
 export const playerRepository = new PostgresPlayerRepository();

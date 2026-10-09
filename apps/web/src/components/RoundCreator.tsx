@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { peladasService } from '../services/peladas.service';
+import { roundsService } from '../services/rounds.service';
 import { playersService, Player } from '../services/players.service';
 import { getInitials } from '../lib/utils';
 import { Users, Calendar, CheckCircle2, ChevronRight, Plus, X } from 'lucide-react';
 
 const DEFAULT_TEAMS = [
-  { id: 'team1', name: 'Laranja', color: '#f97316', players: [] as Player[] },
-  { id: 'team2', name: 'Preto', color: '#27272a', players: [] as Player[] },
-  { id: 'team3', name: 'Branco', color: '#e4e4e7', players: [] as Player[] },
+  { id: 'team1', name: 'Orange', color: '#f97316', players: [] as Player[] },
+  { id: 'team2', name: 'Black', color: '#27272a', players: [] as Player[] },
+  { id: 'team3', name: 'White', color: '#e4e4e7', players: [] as Player[] },
 ];
 
 export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
@@ -70,7 +70,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
       setQuickNickname('');
       setShowQuickAdd(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erro ao adicionar jogador.');
+      alert(err instanceof Error ? err.message : 'Error adding player.');
     } finally {
       setQuickLoading(false);
     }
@@ -104,7 +104,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
       ...prev,
       {
         id: `team_${Date.now()}`,
-        name: `Time ${newIdx}`,
+        name: `Team ${newIdx}`,
         color: colors[(newIdx - 1) % colors.length],
         players: [],
       },
@@ -113,7 +113,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
 
   function removeTeam(teamId: string) {
     if (teams.length <= 2) {
-      alert('A pelada precisa ter pelo menos 2 times.');
+      alert('The round must have at least 2 teams.');
       return;
     }
     setTeams((prev) => prev.filter((t) => t.id !== teamId));
@@ -123,7 +123,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
     if (unassignedPlayers.length > 0) {
       if (
         !confirm(
-          `Ainda há ${unassignedPlayers.length} jogador(es) selecionado(s) sem time. Deseja criar a pelada mesmo assim?`,
+          `There are still ${unassignedPlayers.length} selected player(s) without a team. Create round anyway?`,
         )
       ) {
         return;
@@ -140,15 +140,15 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
         playerIds: t.players.map((p) => p.id),
       }));
 
-      const res = await peladasService.create({
+      const res = await roundsService.create({
         date,
         notes: notes.trim() || undefined,
         teams: teamsPayload,
       });
 
-      router.push(`/peladas/${res.roundId}`);
+      router.push(`/rounds/${res.roundId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar pelada.');
+      setError(err instanceof Error ? err.message : 'Error creating round.');
       setLoading(false);
     }
   }
@@ -164,10 +164,10 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
           >
             1
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider">Data</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Date</span>
         </div>
 
-        <div className={`flex-1 h-0.5 mx-2 ${step >= 2 ? 'bg-[var(--accent)]' : 'bg-[var(--border-color)]'}`} />
+        <div className="flex-1 h-0.5 mx-2 bg-[var(--border-color)]" />
 
         <div className={`flex flex-col items-center gap-1 ${step >= 2 ? 'text-[var(--accent)]' : 'text-[var(--muted)]'}`}>
           <div
@@ -176,10 +176,10 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
           >
             2
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider">Jogadores</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Players</span>
         </div>
 
-        <div className={`flex-1 h-0.5 mx-2 ${step >= 3 ? 'bg-[var(--accent)]' : 'bg-[var(--border-color)]'}`} />
+        <div className="flex-1 h-0.5 mx-2 bg-[var(--border-color)]" />
 
         <div className={`flex flex-col items-center gap-1 ${step >= 3 ? 'text-[var(--accent)]' : 'text-[var(--muted)]'}`}>
           <div
@@ -188,7 +188,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
           >
             3
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider">Times</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Teams</span>
         </div>
       </div>
 
@@ -213,12 +213,12 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
             style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
           >
             <Calendar className="w-5 h-5" style={{ color: 'var(--accent)' }} />
-            Informações da Pelada
+            Round Information
           </h2>
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Data da Partida
+              Match Date
             </label>
             <input
               type="date"
@@ -230,11 +230,11 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Observações <span style={{ color: 'var(--muted)' }}>(opcional)</span>
+              Notes <span style={{ color: 'var(--muted)' }}>(optional)</span>
             </label>
             <input
               type="text"
-              placeholder="Ex: Campo Society 3, quadra externa"
+              placeholder="e.g. Field 3, outdoor turf"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="input"
@@ -246,7 +246,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
             onClick={() => setStep(2)}
             className="btn btn-primary btn-lg w-full mt-2"
           >
-            Próximo: Escolher Jogadores <ChevronRight className="w-4 h-4" />
+            Next: Select Players <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -261,17 +261,17 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                 style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
               >
                 <Users className="w-5 h-5" style={{ color: 'var(--accent)' }} />
-                Quem vai jogar hoje?
+                Who is playing today?
               </h2>
               <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                Selecione os presentes ou adicione novos jogadores
+                Select attending players or add new ones
               </p>
             </div>
             <span
               className="text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ background: 'var(--surface-hover)', color: 'var(--accent)' }}
             >
-              {selectedPlayerIds.size} presentes
+              {selectedPlayerIds.size} present
             </span>
           </div>
 
@@ -284,7 +284,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               style={{ color: 'var(--accent)', borderColor: 'var(--accent)' }}
             >
               <Plus className="w-3.5 h-3.5" />
-              Novo Jogador
+              New Player
             </button>
 
             <div className="flex gap-2">
@@ -294,7 +294,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                 className="text-xs font-semibold px-2 py-1 transition-colors hover:text-[var(--accent)]"
                 style={{ color: 'var(--muted)' }}
               >
-                Marcar Todos
+                Select All
               </button>
               <span style={{ color: 'var(--border-color)' }}>|</span>
               <button
@@ -303,7 +303,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                 className="text-xs font-semibold px-2 py-1 transition-colors hover:text-[var(--danger)]"
                 style={{ color: 'var(--muted)' }}
               >
-                Limpar
+                Clear
               </button>
             </div>
           </div>
@@ -313,7 +313,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
             <form onSubmit={handleQuickAdd} className="card p-4 space-y-3 border-2 border-[var(--accent)] animate-fade-in">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
-                  Cadastrar Jogador Rápido
+                  Quick Add Player
                 </span>
                 <button
                   type="button"
@@ -328,7 +328,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
-                  placeholder="Nome *"
+                  placeholder="Name *"
                   value={quickName}
                   onChange={(e) => setQuickName(e.target.value)}
                   className="input text-xs"
@@ -337,7 +337,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                 />
                 <input
                   type="text"
-                  placeholder="Apelido (opcional)"
+                  placeholder="Nickname (optional)"
                   value={quickNickname}
                   onChange={(e) => setQuickNickname(e.target.value)}
                   className="input text-xs"
@@ -349,7 +349,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                 disabled={quickLoading || !quickName.trim()}
                 className="btn btn-primary w-full text-xs py-2"
               >
-                {quickLoading ? 'Cadastrando...' : 'Adicionar e Selecionar'}
+                {quickLoading ? 'Adding...' : 'Add and Select'}
               </button>
             </form>
           )}
@@ -358,7 +358,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
           <div className="card overflow-hidden max-h-[52vh] overflow-y-auto">
             {allPlayers.length === 0 ? (
               <div className="p-8 text-center text-sm" style={{ color: 'var(--muted)' }}>
-                Nenhum jogador cadastrado ainda. Use o botão acima para adicionar!
+                No players registered yet. Use the button above to add players!
               </div>
             ) : (
               allPlayers.map((player, idx) => {
@@ -421,7 +421,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               onClick={() => setStep(1)}
               className="btn btn-secondary flex-1"
             >
-              Voltar
+              Back
             </button>
             <button
               type="button"
@@ -430,7 +430,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               className="btn btn-primary flex-[2]"
               style={{ opacity: selectedPlayerIds.size === 0 ? 0.5 : 1 }}
             >
-              Montar Times ({selectedPlayerIds.size}) <ChevronRight className="w-4 h-4" />
+              Assemble Teams ({selectedPlayerIds.size}) <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -444,7 +444,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               className="text-base font-bold"
               style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
             >
-              Divisão dos Times
+              Team Allocation
             </h2>
             <button
               type="button"
@@ -453,7 +453,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               style={{ color: 'var(--accent)' }}
             >
               <Plus className="w-4 h-4" />
-              Adicionar Time
+              Add Team
             </button>
           </div>
 
@@ -462,10 +462,10 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--warning)' }}>
-                  Aguardando Time ({unassignedPlayers.length})
+                  Awaiting Team ({unassignedPlayers.length})
                 </span>
                 <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
-                  Clique para alocar
+                  Hover to assign
                 </span>
               </div>
 
@@ -488,7 +488,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                       style={{ background: 'var(--surface)', border: '1px solid var(--border-color)' }}
                     >
                       <span className="text-[9px] uppercase tracking-wider font-bold p-1.5 bg-[var(--surface-hover)]" style={{ color: 'var(--muted)' }}>
-                        Enviar para:
+                        Send to:
                       </span>
                       {teams.map((t) => (
                         <button
@@ -536,7 +536,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-[11px] font-bold px-2 py-0.5 rounded-md" style={{ background: 'var(--surface)', color: 'var(--muted)' }}>
-                      {team.players.length} atletas
+                      {team.players.length} players
                     </span>
                     {teams.length > 2 && (
                       <button
@@ -556,7 +556,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                     <div
                       key={p.id}
                       onClick={() => removeFromTeam(p)}
-                      title="Clique para remover do time"
+                      title="Click to remove from team"
                       className="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors group"
                       style={{ background: 'var(--surface)', border: '1px solid var(--border-color)', color: 'var(--foreground)' }}
                     >
@@ -569,7 +569,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
 
                   {team.players.length === 0 && (
                     <span className="text-xs italic py-1" style={{ color: 'var(--muted)' }}>
-                      Nenhum atleta alocado neste time ainda.
+                      No players assigned to this team yet.
                     </span>
                   )}
                 </div>
@@ -583,7 +583,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               onClick={() => setStep(2)}
               className="btn btn-secondary flex-1"
             >
-              Voltar
+              Back
             </button>
             <button
               type="button"
@@ -592,7 +592,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               className="btn btn-primary flex-[2]"
               style={{ opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? 'Criando Pelada...' : 'Iniciar Pelada'}
+              {loading ? 'Creating Round...' : 'Start Round'}
             </button>
           </div>
         </div>

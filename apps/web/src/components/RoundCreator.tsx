@@ -19,6 +19,7 @@ import {
   GripVertical,
 } from 'lucide-react';
 import { StarRating } from './StarRating';
+import { balanceTeams } from '../lib/teamBalancer';
 
 const DEFAULT_TEAMS = [
   { id: 'team1', name: 'Time Roxo', color: '#8b5cf6', players: [] as Player[] },
@@ -151,66 +152,30 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
     showToast('Times limpos! Todos os jogadores voltaram para o banco.');
   }
 
-  // Sorteio Equilibrado por Estrelas (Greedy Snake Distribution)
+  // Sorteio Equilibrado por Estrelas e Elenco
   function handleBalancedDraw() {
-    if (selectedPlayers.length === 0) return;
-    if (teams.length === 0) return;
-
-    // Embaralha dentro de cada faixa de estrelas para garantir variação a cada clique
-    const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-
-    const stars3 = shuffle(selectedPlayers.filter((p) => (p.stars ?? 2) === 3));
-    const stars2 = shuffle(selectedPlayers.filter((p) => (p.stars ?? 2) === 2));
-    const stars1 = shuffle(selectedPlayers.filter((p) => (p.stars ?? 2) === 1));
-
-    const sortedByStars = [...stars3, ...stars2, ...stars1];
-
-    const distributed = teams.map((t) => ({ ...t, players: [] as Player[] }));
-
-    // Distribuição balanceada: atribui o jogador ao time com menor soma de estrelas
-    for (const player of sortedByStars) {
-      const pStars = player.stars ?? 2;
-
-      let bestIdx = 0;
-      let minStars = Infinity;
-      let minCount = Infinity;
-
-      for (let i = 0; i < distributed.length; i++) {
-        const teamTotalStars = distributed[i].players.reduce(
-          (acc, p) => acc + (p.stars ?? 2),
-          0,
-        );
-        const teamCount = distributed[i].players.length;
-
-        if (
-          teamTotalStars < minStars ||
-          (teamTotalStars === minStars && teamCount < minCount)
-        ) {
-          minStars = teamTotalStars;
-          minCount = teamCount;
-          bestIdx = i;
-        }
-      }
-
-      distributed[bestIdx].players.push(player);
-    }
-
-    setTeams(distributed);
-    showToast('⚡ Sorteio equilibrado por estrelas concluído com sucesso!');
+    if (selectedPlayers.length === 0 || teams.length === 0) return;
+    const balancedSquads = balanceTeams(selectedPlayers, teams.length);
+    setTeams((prev) =>
+      prev.map((t, idx) => ({
+        ...t,
+        players: balancedSquads[idx] || [],
+      })),
+    );
+    showToast('⚡ Times sorteados com equilíbrio máximo de estrelas e elenco!');
   }
 
-  // Sorteio Aleatório Simples
+  // Sorteio Aleatório Equilibrado (reembaralha mantendo equilíbrio matemático)
   function handleRandomDraw() {
-    if (selectedPlayers.length === 0) return;
-    const shuffled = [...selectedPlayers].sort(() => Math.random() - 0.5);
-    const distributed = teams.map((t) => ({ ...t, players: [] as Player[] }));
-
-    shuffled.forEach((p, idx) => {
-      distributed[idx % distributed.length].players.push(p);
-    });
-
-    setTeams(distributed);
-    showToast('🎲 Sorteio aleatório realizado!');
+    if (selectedPlayers.length === 0 || teams.length === 0) return;
+    const balancedSquads = balanceTeams(selectedPlayers, teams.length);
+    setTeams((prev) =>
+      prev.map((t, idx) => ({
+        ...t,
+        players: balancedSquads[idx] || [],
+      })),
+    );
+    showToast('🎲 Sorteio reembaralhado com equilíbrio garantido!');
   }
 
   // Drag and drop handlers (HTML5 + mouse/touch support)
@@ -715,8 +680,8 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               <button
                 type="button"
                 onClick={handleBalancedDraw}
-                className="btn btn-primary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 shadow-lg"
-                title="Distribui os jogadores para somar a mesma quantidade de estrelas em cada time"
+                className="btn btn-primary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
+                title="Sorteia dividindo craques, médios e básicos com equilíbrio matemático perfeito"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>⚡ Sorteio Equilibrado</span>
@@ -725,11 +690,11 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               <button
                 type="button"
                 onClick={handleRandomDraw}
-                className="btn btn-secondary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5"
-                title="Sorteia os jogadores aleatoriamente"
+                className="btn btn-secondary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                title="Reembaralha os jogadores gerando uma nova combinação sempre equilibrada"
               >
                 <Shuffle className="w-3.5 h-3.5" />
-                <span>🎲 Aleatório</span>
+                <span>🎲 Reembaralhar</span>
               </button>
 
               <button
@@ -834,6 +799,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
           <div className="space-y-3">
             {teams.map((team) => {
               const totalStars = team.players.reduce((sum, p) => sum + (p.stars ?? 2), 0);
+              const craquesCount = team.players.filter((p) => (p.stars ?? 2) === 3).length;
               const isOver = dragOverTeamId === team.id;
 
               return (
@@ -874,7 +840,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                     </div>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      {/* Stats badge: Player count and Star sum */}
+                      {/* Stats badge: Player count, Star sum and Craques count */}
                       <span
                         className="text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1.5"
                         style={{ background: 'var(--surface)', color: 'var(--foreground)' }}
@@ -883,6 +849,11 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                         <span className="text-purple-300 font-extrabold flex items-center gap-1">
                           • {totalStars} <StarRating stars={1} max={1} size={11} />
                         </span>
+                        {craquesCount > 0 && (
+                          <span className="text-[10px] text-muted font-medium">
+                            ({craquesCount} craque{craquesCount > 1 ? 's' : ''})
+                          </span>
+                        )}
                       </span>
 
                       {teams.length > 2 && (

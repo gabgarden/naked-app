@@ -20,10 +20,12 @@ import {
   ChevronRight,
   Play,
   Trophy,
+  Sparkles,
 } from 'lucide-react';
 import { MatchCreator } from './MatchCreator';
 import { StarRating } from './StarRating';
 import { matchesService } from '../services/matches.service';
+import { balanceTeams } from '../lib/teamBalancer';
 import {
   determinePeladaState,
   PELADA_MATCH_DURATION_MINUTES,
@@ -128,6 +130,20 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
       }),
     );
 
+    setSelectedPlayerForMove(null);
+  }
+
+  // Auto-rebalance teams using star rating balancer
+  function handleAutoRebalance() {
+    const allPlayersInTeams = teamsState.flatMap((t) => t.players);
+    if (allPlayersInTeams.length === 0 || teamsState.length === 0) return;
+    const balancedSquads = balanceTeams(allPlayersInTeams, teamsState.length);
+    setTeamsState((prev) =>
+      prev.map((t, idx) => ({
+        ...t,
+        players: balancedSquads[idx] || [],
+      })),
+    );
     setSelectedPlayerForMove(null);
   }
 
@@ -580,6 +596,20 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
                 style={{ color: 'var(--muted)' }}
               >
                 <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Auto-rebalance quick action */}
+            <div className="px-4 py-2 border-b border-[var(--border-color)] bg-[var(--surface-hover)] flex items-center justify-between">
+              <span className="text-[11px] text-muted">Ajuste manual ou automático:</span>
+              <button
+                type="button"
+                onClick={handleAutoRebalance}
+                className="btn btn-secondary text-xs py-1 px-2.5 flex items-center gap-1.5 cursor-pointer hover:border-[var(--accent)]"
+                title="Redistribui os jogadores com equilíbrio perfeito de estrelas e elenco"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span>⚡ Rebalancear Times</span>
               </button>
             </div>
 

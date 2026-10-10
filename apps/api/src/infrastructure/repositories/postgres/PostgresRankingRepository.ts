@@ -11,6 +11,7 @@ export interface RankingEntry {
   total_wins: number;
   total_draws: number;
   total_losses: number;
+  clean_sheets: number;
   points: number;
 }
 
@@ -28,10 +29,17 @@ export class PostgresRankingRepository {
         COALESCE(ps.total_wins, 0) as total_wins,
         COALESCE(ps.total_draws, 0) as total_draws,
         COALESCE(ps.total_losses, 0) as total_losses,
-        (COALESCE(ps.total_wins, 0) * 3 + COALESCE(ps.total_draws, 0)) as points
+        COALESCE(ps.clean_sheets, 0) as clean_sheets,
+        (
+          COALESCE(ps.total_wins, 0) * 3 +
+          COALESCE(ps.total_draws, 0) * 1 +
+          COALESCE(ps.total_goals, 0) * 2 +
+          COALESCE(ps.total_assists, 0) * 1 +
+          COALESCE(ps.clean_sheets, 0) * 3
+        ) as points
       FROM players p
       LEFT JOIN player_stats ps ON ps.player_id = p.id
-      ORDER BY points DESC, total_goals DESC, name ASC
+      ORDER BY points DESC, total_goals DESC, total_wins DESC, name ASC
     `;
 
     return rows.map((r) => ({
@@ -45,6 +53,7 @@ export class PostgresRankingRepository {
       total_wins: Number(r.total_wins),
       total_draws: Number(r.total_draws),
       total_losses: Number(r.total_losses),
+      clean_sheets: Number(r.clean_sheets || 0),
       points: Number(r.points),
     }));
   }

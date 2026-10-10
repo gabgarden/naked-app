@@ -242,16 +242,25 @@ export class PostgresMatchRepository implements IMatchRepository {
       allMatchPlayers.push({ playerId: p.player_id, isWin, isDraw, isLoss });
     }
 
+    const cleanSheetPlayerIds = new Set<string>();
+    if (scoreB === 0 && match.goalkeeperAId) {
+      cleanSheetPlayerIds.add(match.goalkeeperAId);
+    }
+    if (scoreA === 0 && match.goalkeeperBId) {
+      cleanSheetPlayerIds.add(match.goalkeeperBId);
+    }
+
     for (const mp of allMatchPlayers) {
       const goals = goalsByPlayer[mp.playerId] || 0;
       const assists = assistsByPlayer[mp.playerId] || 0;
       const wins = mp.isWin ? 1 : 0;
       const draws = mp.isDraw ? 1 : 0;
       const losses = mp.isLoss ? 1 : 0;
+      const cleanSheet = cleanSheetPlayerIds.has(mp.playerId) ? 1 : 0;
 
       await sql`
-        INSERT INTO player_stats (id, player_id, total_games, total_goals, total_assists, total_wins, total_draws, total_losses, updated_at)
-        VALUES (gen_random_uuid(), ${mp.playerId}, 1, ${goals}, ${assists}, ${wins}, ${draws}, ${losses}, NOW())
+        INSERT INTO player_stats (id, player_id, total_games, total_goals, total_assists, total_wins, total_draws, total_losses, clean_sheets, updated_at)
+        VALUES (gen_random_uuid(), ${mp.playerId}, 1, ${goals}, ${assists}, ${wins}, ${draws}, ${losses}, ${cleanSheet}, NOW())
         ON CONFLICT (player_id) DO UPDATE SET
           total_games = player_stats.total_games + EXCLUDED.total_games,
           total_goals = player_stats.total_goals + EXCLUDED.total_goals,
@@ -259,19 +268,21 @@ export class PostgresMatchRepository implements IMatchRepository {
           total_wins = player_stats.total_wins + EXCLUDED.total_wins,
           total_draws = player_stats.total_draws + EXCLUDED.total_draws,
           total_losses = player_stats.total_losses + EXCLUDED.total_losses,
+          clean_sheets = COALESCE(player_stats.clean_sheets, 0) + EXCLUDED.clean_sheets,
           updated_at = NOW();
       `;
 
       await sql`
-        INSERT INTO player_round_stats (id, player_id, round_id, games, goals, assists, wins, draws, losses)
-        VALUES (gen_random_uuid(), ${mp.playerId}, ${match.roundId}, 1, ${goals}, ${assists}, ${wins}, ${draws}, ${losses})
+        INSERT INTO player_round_stats (id, player_id, round_id, games, goals, assists, wins, draws, losses, clean_sheets)
+        VALUES (gen_random_uuid(), ${mp.playerId}, ${match.roundId}, 1, ${goals}, ${assists}, ${wins}, ${draws}, ${losses}, ${cleanSheet})
         ON CONFLICT (player_id, round_id) DO UPDATE SET
           games = player_round_stats.games + EXCLUDED.games,
           goals = player_round_stats.goals + EXCLUDED.goals,
           assists = player_round_stats.assists + EXCLUDED.assists,
           wins = player_round_stats.wins + EXCLUDED.wins,
           draws = player_round_stats.draws + EXCLUDED.draws,
-          losses = player_round_stats.losses + EXCLUDED.losses;
+          losses = player_round_stats.losses + EXCLUDED.losses,
+          clean_sheets = COALESCE(player_round_stats.clean_sheets, 0) + EXCLUDED.clean_sheets;
       `;
     }
   }

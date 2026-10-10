@@ -11,6 +11,7 @@ export interface RankingEntry {
   total_wins: number;
   total_draws: number;
   total_losses: number;
+  clean_sheets: number;
   points: number;
 }
 

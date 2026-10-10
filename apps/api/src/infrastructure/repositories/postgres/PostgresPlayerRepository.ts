@@ -212,6 +212,7 @@ export class PostgresPlayerRepository implements IPlayerRepository {
       total_wins: r.total_wins,
       total_draws: r.total_draws,
       total_losses: r.total_losses,
+      clean_sheets: Number(r.clean_sheets || 0),
       updated_at: new Date(r.updated_at),
     };
   }
@@ -237,6 +238,7 @@ export class PostgresPlayerRepository implements IPlayerRepository {
       wins: r.wins,
       draws: r.draws,
       losses: r.losses,
+      clean_sheets: Number(r.clean_sheets || 0),
       round: { date: r.round_date, status: r.round_status },
     }));
   }

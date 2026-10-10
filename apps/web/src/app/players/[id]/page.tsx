@@ -34,7 +34,12 @@ export default async function PlayerProfilePage({ params }: PageProps) {
     total_losses: 0,
   };
 
-  const points = stats.total_wins * 3 + stats.total_draws;
+  const points =
+    stats.total_wins * 3 +
+    stats.total_draws * 1 +
+    stats.total_goals * 2 +
+    stats.total_assists * 1 +
+    (stats.clean_sheets || 0) * 3;
   const winRate = calculateWinRate(stats.total_wins, stats.total_draws, stats.total_games);
   const history = playerProfile.history || [];
 
@@ -167,10 +172,19 @@ export default async function PlayerProfilePage({ params }: PageProps) {
 
           <div className="card p-4 flex flex-col justify-between">
             <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              Assistências
+              Assistências (+1 pt)
             </span>
             <p className="stat-number text-2xl mt-2" style={{ color: 'var(--foreground)' }}>
               {stats.total_assists}
+            </p>
+          </div>
+
+          <div className="card p-4 flex flex-col justify-between col-span-2">
+            <span className="text-xs font-semibold text-cyan-400">
+              🧤 Goleiro Sem Sofrer Gols (+3 pts cada)
+            </span>
+            <p className="stat-number text-2xl mt-2 text-cyan-300">
+              {stats.clean_sheets || 0}
             </p>
           </div>
         </div>

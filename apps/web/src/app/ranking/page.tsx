@@ -1,6 +1,7 @@
 import { Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { rankingService, RankingEntry } from '../../services/ranking.service';
+import { ScoringRulesModal } from '../../components/ScoringRulesModal';
 
 export const revalidate = 0;
 
@@ -22,23 +23,21 @@ export default async function RankingPage() {
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1
             className="text-2xl font-bold"
             style={{ fontFamily: "'Barlow Condensed', sans-serif", color: 'var(--foreground)' }}
           >
-            Global Ranking
+            Ranking Geral
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
-            Cumulative stats across all rounds
+          <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+            Estatísticas e pontuação acumulada de todas as rodadas
           </p>
         </div>
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: 'rgba(249,115,22,0.15)', color: 'var(--accent)' }}
-        >
-          <Trophy className="w-5 h-5" />
+
+        <div className="flex items-center gap-2">
+          <ScoringRulesModal />
         </div>
       </div>
 
@@ -131,6 +130,11 @@ export default async function RankingPage() {
                       <span className="text-[10px] font-semibold" style={{ color: 'var(--muted)' }}>
                         🎯 {player.total_assists}
                       </span>
+                      {(player.clean_sheets ?? 0) > 0 && (
+                        <span className="text-[10px] font-bold text-cyan-300">
+                          🧤 {player.clean_sheets}
+                        </span>
+                      )}
                     </div>
                   </Link>
                 );
@@ -152,12 +156,13 @@ export default async function RankingPage() {
                 <span className="w-6 text-center">#</span>
                 <span>Player</span>
               </div>
-              <div className="flex items-center gap-4 text-right">
-                <span className="w-8">M</span>
-                <span className="w-8">W</span>
-                <span className="w-8">G</span>
-                <span className="w-8">A</span>
-                <span className="w-12 text-right">PTS</span>
+              <div className="flex items-center gap-2.5 sm:gap-4 text-right">
+                <span className="w-6 sm:w-8" title="Partidas">M</span>
+                <span className="w-6 sm:w-8 text-emerald-400" title="Vitórias (+3 pts)">W</span>
+                <span className="w-6 sm:w-8 text-purple-300" title="Gols Marcados (+2 pts)">G</span>
+                <span className="w-6 sm:w-8 text-blue-300" title="Assistências (+1 pt)">A</span>
+                <span className="w-6 sm:w-8 text-cyan-300" title="Goleiro Sem Sofrer Gol (+3 pts)">SG</span>
+                <span className="w-10 sm:w-12 text-right" title="Pontos Totais">PTS</span>
               </div>
             </div>
 
@@ -197,21 +202,24 @@ export default async function RankingPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs font-semibold text-right flex-shrink-0">
-                    <span className="w-8" style={{ color: 'var(--muted)' }}>
+                  <div className="flex items-center gap-2.5 sm:gap-4 text-xs font-semibold text-right flex-shrink-0">
+                    <span className="w-6 sm:w-8" style={{ color: 'var(--muted)' }}>
                       {player.total_games}
                     </span>
-                    <span className="w-8" style={{ color: 'var(--success)' }}>
+                    <span className="w-6 sm:w-8" style={{ color: 'var(--success)' }}>
                       {player.total_wins}
                     </span>
-                    <span className="w-8" style={{ color: 'var(--foreground)' }}>
+                    <span className="w-6 sm:w-8 text-purple-300">
                       {player.total_goals}
                     </span>
-                    <span className="w-8" style={{ color: 'var(--foreground)' }}>
+                    <span className="w-6 sm:w-8 text-blue-300">
                       {player.total_assists}
                     </span>
+                    <span className="w-6 sm:w-8 text-cyan-300 font-bold">
+                      {player.clean_sheets ?? 0}
+                    </span>
                     <span
-                      className="w-12 text-right font-black text-sm"
+                      className="w-10 sm:w-12 text-right font-black text-sm"
                       style={{ color: 'var(--accent)' }}
                     >
                       {player.points}

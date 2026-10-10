@@ -22,6 +22,7 @@ export interface PlayerStats {
   total_wins: number;
   total_draws: number;
   total_losses: number;
+  clean_sheets?: number;
   updated_at: Date;
 }
 
@@ -35,6 +36,7 @@ export interface PlayerRoundStats {
   wins: number;
   draws: number;
   losses: number;
+  clean_sheets?: number;
   round?: {
     date: string;
     status: string;

@@ -74,7 +74,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
           ? {
               ...t,
               color: bib.hex,
-              name: updatedName || t.name,
+              name: updatedName || `Time ${bib.shortName}`,
             }
           : t,
       ),

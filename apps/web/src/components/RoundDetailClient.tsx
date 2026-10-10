@@ -70,6 +70,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
   async function handleUpdateTeamBib(bib: BibColor, updatedName?: string) {
     if (!bibPicker.teamId) return;
     const teamId = bibPicker.teamId;
+    const newName = updatedName || `Time ${bib.shortName}`;
 
     // Optimistically update
     setRound((prev) => ({
@@ -79,7 +80,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
           ? {
               ...t,
               color: bib.hex,
-              name: updatedName || t.name,
+              name: newName,
             }
           : t,
       ),
@@ -91,7 +92,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
           ? {
               ...t,
               color: bib.hex,
-              name: updatedName || t.name,
+              name: newName,
             }
           : t,
       ),
@@ -100,7 +101,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
     try {
       await roundsService.updateTeam(round.id, teamId, {
         color: bib.hex,
-        name: updatedName,
+        name: newName,
       });
       router.refresh();
     } catch (err) {

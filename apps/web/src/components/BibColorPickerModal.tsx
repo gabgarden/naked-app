@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Check, Shirt, Sparkles } from 'lucide-react';
+import { X, Check, Shirt } from 'lucide-react';
 import { BIB_COLORS, BibColor, findBibColor } from '../lib/teamColors';
 
 interface BibColorPickerModalProps {
@@ -20,12 +20,13 @@ export function BibColorPickerModal({
   onSelectColor,
 }: BibColorPickerModalProps) {
   const [selectedBib, setSelectedBib] = useState<BibColor>(() => findBibColor(currentColor));
-  const [syncTeamName, setSyncTeamName] = useState(false);
 
   if (!isOpen) return null;
 
   function handleConfirm(bib: BibColor) {
-    const newName = syncTeamName ? `Time ${bib.shortName}` : undefined;
+    setSelectedBib(bib);
+    // Automaticamente renomeia o time para o nome da cor do colete (ex: "Time Laranja", "Time Azul")
+    const newName = `Time ${bib.shortName}`;
     onSelectColor(bib, newName);
     onClose();
   }
@@ -70,19 +71,6 @@ export function BibColorPickerModal({
           </button>
         </div>
 
-        {/* Sync team name checkbox */}
-        <label className="flex items-center gap-2 text-xs text-muted cursor-pointer select-none px-1">
-          <input
-            type="checkbox"
-            checked={syncTeamName}
-            onChange={(e) => setSyncTeamName(e.target.checked)}
-            className="rounded border-[var(--border-color)] bg-[var(--surface-hover)] text-[var(--accent)] focus:ring-0 cursor-pointer"
-          />
-          <span>
-            Atualizar também o nome do time para <strong className="text-white">Time {selectedBib.shortName}</strong>
-          </span>
-        </label>
-
         {/* 8 Bib Colors Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
           {BIB_COLORS.map((bib) => {
@@ -92,10 +80,7 @@ export function BibColorPickerModal({
               <button
                 key={bib.id}
                 type="button"
-                onClick={() => {
-                  setSelectedBib(bib);
-                  handleConfirm(bib);
-                }}
+                onClick={() => handleConfirm(bib)}
                 className={`relative group p-3 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 ${
                   isSelected ? 'ring-2 ring-white scale-102 shadow-xl' : 'hover:scale-103'
                 }`}
@@ -136,7 +121,7 @@ export function BibColorPickerModal({
         {/* Footer info */}
         <div className="pt-2 text-center">
           <p className="text-[11px] text-muted">
-            Toque na cor do colete que o time está usando em campo.
+            Ao escolher a cor, o time é renomeado automaticamente para a cor do colete.
           </p>
         </div>
       </div>

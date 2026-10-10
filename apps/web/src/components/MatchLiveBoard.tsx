@@ -133,6 +133,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
   async function handleSelectBibColor(newBib: BibColor, updatedName?: string) {
     if (!bibColorModal.teamId) return;
     const teamId = bibColorModal.teamId;
+    const newName = updatedName || `Time ${newBib.shortName}`;
 
     // Optimistically update local match state
     setMatch((prev) => {
@@ -141,13 +142,13 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
         next.team_a = {
           ...next.team_a,
           color: newBib.hex,
-          name: updatedName || next.team_a.name,
+          name: newName,
         };
       } else if (next.team_b?.id === teamId) {
         next.team_b = {
           ...next.team_b,
           color: newBib.hex,
-          name: updatedName || next.team_b.name,
+          name: newName,
         };
       }
       return next;
@@ -156,7 +157,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
     try {
       await roundsService.updateTeam(match.round_id, teamId, {
         color: newBib.hex,
-        name: updatedName,
+        name: newName,
       });
     } catch (err) {
       console.error('Erro ao atualizar cor do colete:', err);

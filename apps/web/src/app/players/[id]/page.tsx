@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Calendar, Edit2 } from 'lucide-react';
 import { playersService } from '../../../services/players.service';
 import { getInitials, getDisplayName, calculateWinRate, formatDateShort } from '../../../lib/utils';
+import { PlayerProfileStars } from '../../../components/PlayerProfileStars';
 
 export const revalidate = 0;
 
@@ -47,7 +48,15 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           style={{ color: 'var(--muted)' }}
         >
           <ArrowLeft className="w-4 h-4" />
-          Players
+          Jogadores
+        </Link>
+
+        <Link
+          href={`/players/${playerProfile.id}/edit`}
+          className="btn btn-secondary btn-sm flex items-center gap-1.5"
+        >
+          <Edit2 className="w-3.5 h-3.5" />
+          <span>Editar</span>
         </Link>
       </div>
 
@@ -64,7 +73,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           style={{
             background: 'linear-gradient(135deg, var(--accent-dark), var(--accent))',
             color: '#fff',
-            boxShadow: '0 8px 24px rgba(249,115,22,0.25)',
+            boxShadow: '0 8px 24px rgba(103, 61, 230, 0.35)',
           }}
         >
           {getInitials(playerProfile.name)}
@@ -77,20 +86,17 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           {getDisplayName(playerProfile.name, playerProfile.nickname)}
         </h1>
 
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-sm text-amber-400 font-bold">
-            {'⭐'.repeat(playerProfile.stars ?? 2)}
-          </span>
-          <span className="text-xs text-muted">
-            ({playerProfile.stars === 1 ? 'Nível 1 - Básico' : playerProfile.stars === 2 ? 'Nível 2 - Médio' : 'Nível 3 - Craque'})
-          </span>
-        </div>
-
         {playerProfile.nickname && (
           <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
-            {playerProfile.name}
+            Nome: {playerProfile.name}
           </p>
         )}
+
+        {/* Interactive Discrete Star Switcher */}
+        <PlayerProfileStars
+          playerId={playerProfile.id}
+          initialStars={playerProfile.stars ?? 2}
+        />
 
         {/* Highlight points & winrate */}
         <div
@@ -99,7 +105,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
         >
           <div className="flex flex-col items-center">
             <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Points
+              Pontos
             </span>
             <span
               className="stat-number text-2xl font-black"
@@ -113,7 +119,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
 
           <div className="flex flex-col items-center">
             <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Win Rate
+              Aproveitamento
             </span>
             <span className="stat-number text-2xl font-black" style={{ color: 'var(--foreground)' }}>
               {winRate}%
@@ -128,13 +134,13 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           className="text-sm font-bold uppercase tracking-wider px-1"
           style={{ color: 'var(--muted)' }}
         >
-          Overall Statistics
+          Estatísticas Gerais
         </h2>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="card p-4 flex flex-col justify-between">
             <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              Games
+              Partidas
             </span>
             <p className="stat-number text-2xl mt-2" style={{ color: 'var(--foreground)' }}>
               {stats.total_games}
@@ -143,7 +149,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
 
           <div className="card p-4 flex flex-col justify-between">
             <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              Wins
+              Vitórias
             </span>
             <p className="stat-number text-2xl mt-2" style={{ color: 'var(--success)' }}>
               {stats.total_wins}
@@ -152,7 +158,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
 
           <div className="card p-4 flex flex-col justify-between">
             <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              Goals Scored
+              Gols Marcados
             </span>
             <p className="stat-number text-2xl mt-2" style={{ color: 'var(--accent)' }}>
               {stats.total_goals}
@@ -161,7 +167,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
 
           <div className="card p-4 flex flex-col justify-between">
             <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              Assists
+              Assistências
             </span>
             <p className="stat-number text-2xl mt-2" style={{ color: 'var(--foreground)' }}>
               {stats.total_assists}
@@ -173,23 +179,23 @@ export default async function PlayerProfilePage({ params }: PageProps) {
         <div className="card p-4 flex items-center justify-around text-center">
           <div>
             <p className="text-xs font-bold" style={{ color: 'var(--success)' }}>
-              {stats.total_wins}W
+              {stats.total_wins}V
             </p>
-            <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Wins</p>
+            <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Vitórias</p>
           </div>
           <div className="w-px h-6" style={{ background: 'var(--border-color)' }} />
           <div>
             <p className="text-xs font-bold" style={{ color: 'var(--warning)' }}>
-              {stats.total_draws}D
+              {stats.total_draws}E
             </p>
-            <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Draws</p>
+            <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Empates</p>
           </div>
           <div className="w-px h-6" style={{ background: 'var(--border-color)' }} />
           <div>
             <p className="text-xs font-bold" style={{ color: 'var(--danger)' }}>
-              {stats.total_losses}L
+              {stats.total_losses}D
             </p>
-            <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Losses</p>
+            <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Derrotas</p>
           </div>
         </div>
       </section>
@@ -200,13 +206,13 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           className="text-sm font-bold uppercase tracking-wider px-1"
           style={{ color: 'var(--muted)' }}
         >
-          Round History
+          Histórico de Rodadas
         </h2>
 
         {history.length === 0 ? (
           <div className="card p-6 text-center">
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
-              Has not participated in any finished round yet.
+              Ainda não participou de nenhuma rodada finalizada.
             </p>
           </div>
         ) : (
@@ -231,8 +237,8 @@ export default async function PlayerProfilePage({ params }: PageProps) {
                     {formatDateShort(h.round?.date)}
                   </p>
                   <div className="flex items-center gap-3 mt-0.5 text-xs">
-                    <span style={{ color: 'var(--muted)' }}>⚽ {h.goals} goals</span>
-                    <span style={{ color: 'var(--muted)' }}>🎯 {h.assists} assists</span>
+                    <span style={{ color: 'var(--muted)' }}>⚽ {h.goals} gols</span>
+                    <span style={{ color: 'var(--muted)' }}>🎯 {h.assists} assistências</span>
                     <span
                       className="font-bold"
                       style={{
@@ -244,7 +250,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
                             : 'var(--danger)',
                       }}
                     >
-                      {h.wins}W {h.draws}D {h.losses}L
+                      {h.wins}V {h.draws}E {h.losses}D
                     </span>
                   </div>
                 </div>

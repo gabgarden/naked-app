@@ -20,8 +20,8 @@ import {
 } from 'lucide-react';
 
 const DEFAULT_TEAMS = [
-  { id: 'team1', name: 'Time Volt', color: '#ccff00', players: [] as Player[] },
-  { id: 'team2', name: 'Time Ciano', color: '#00f0ff', players: [] as Player[] },
+  { id: 'team1', name: 'Time Roxo', color: '#8b5cf6', players: [] as Player[] },
+  { id: 'team2', name: 'Time Preto', color: '#1e293b', players: [] as Player[] },
   { id: 'team3', name: 'Time Branco', color: '#f8fafc', players: [] as Player[] },
 ];
 
@@ -124,7 +124,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
   }
 
   function addTeam() {
-    const colors = ['#f43f5e', '#10b981', '#c084fc', '#fb923c', '#eab308'];
+    const colors = ['#8b5cf6', '#6366f1', '#ec4899', '#3b82f6', '#f59e0b'];
     const newIdx = teams.length + 1;
     setTeams((prev) => [
       ...prev,
@@ -260,8 +260,8 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
       ghost.style.pointerEvents = 'none';
       ghost.style.padding = '6px 12px';
       ghost.style.borderRadius = '8px';
-      ghost.style.background = 'rgba(204, 255, 0, 0.95)';
-      ghost.style.color = '#080A10';
+      ghost.style.background = 'rgba(103, 61, 230, 0.95)';
+      ghost.style.color = '#ffffff';
       ghost.style.fontWeight = 'bold';
       ghost.style.fontSize = '12px';
       ghost.style.boxShadow = '0 8px 24px rgba(0,0,0,0.5)';
@@ -357,8 +357,8 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
           style={{
             background: 'rgba(8, 10, 16, 0.95)',
             borderColor: 'var(--accent)',
-            color: 'var(--accent)',
-            boxShadow: '0 0 20px rgba(204, 255, 0, 0.3)',
+            color: 'var(--accent-light)',
+            boxShadow: '0 0 20px rgba(103, 61, 230, 0.35)',
           }}
         >
           <Sparkles className="w-4 h-4" />
@@ -373,7 +373,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
         >
           <div
             className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold"
-            style={{ background: step === 1 ? 'rgba(204,255,0,0.15)' : 'transparent' }}
+            style={{ background: step === 1 ? 'rgba(103,61,230,0.2)' : 'transparent' }}
           >
             1
           </div>
@@ -387,7 +387,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
         >
           <div
             className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold"
-            style={{ background: step === 2 ? 'rgba(204,255,0,0.15)' : 'transparent' }}
+            style={{ background: step === 2 ? 'rgba(103,61,230,0.2)' : 'transparent' }}
           >
             2
           </div>
@@ -401,7 +401,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
         >
           <div
             className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold"
-            style={{ background: step === 3 ? 'rgba(204,255,0,0.15)' : 'transparent' }}
+            style={{ background: step === 3 ? 'rgba(103,61,230,0.2)' : 'transparent' }}
           >
             3
           </div>
@@ -574,7 +574,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                         quickStars === s ? 'ring-1' : ''
                       }`}
                       style={{
-                        background: quickStars === s ? 'rgba(204,255,0,0.15)' : 'var(--surface)',
+                        background: quickStars === s ? 'rgba(103,61,230,0.2)' : 'var(--surface)',
                         borderColor: quickStars === s ? 'var(--accent)' : 'var(--border-color)',
                         color: quickStars === s ? '#fff' : 'var(--muted)',
                       }}
@@ -612,7 +612,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                       idx < allPlayers.length - 1 ? 'border-b border-[var(--border-color)]' : ''
                     }`}
                     style={{
-                      background: isSelected ? 'rgba(204,255,0,0.06)' : 'transparent',
+                      background: isSelected ? 'rgba(103,61,230,0.1)' : 'transparent',
                     }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -816,7 +816,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                     isOver ? 'ring-2 ring-[var(--accent)] border-[var(--accent)] shadow-xl' : ''
                   }`}
                   style={{
-                    background: isOver ? 'rgba(204,255,0,0.06)' : 'var(--surface)',
+                    background: isOver ? 'rgba(103,61,230,0.1)' : 'var(--surface)',
                   }}
                 >
                   <div
@@ -953,7 +953,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                           isInTeam ? 'ring-2 ring-[var(--accent)]' : 'hover:scale-[1.02]'
                         }`}
                         style={{
-                          background: isInTeam ? 'rgba(204,255,0,0.12)' : 'var(--surface-2)',
+                          background: isInTeam ? 'rgba(103,61,230,0.18)' : 'var(--surface-2)',
                           borderColor: isInTeam ? 'var(--accent)' : 'var(--border-color)',
                         }}
                       >

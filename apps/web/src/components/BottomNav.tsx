@@ -39,7 +39,7 @@ export default function BottomNav() {
               <div
                 className="relative flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200"
                 style={{
-                  background: isActive ? 'rgba(204, 255, 0, 0.15)' : 'transparent',
+                  background: isActive ? 'rgba(103, 61, 230, 0.18)' : 'transparent',
                 }}
               >
                 <Icon

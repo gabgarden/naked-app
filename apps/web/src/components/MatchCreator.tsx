@@ -187,7 +187,7 @@ export function MatchCreator({ round }: MatchCreatorProps) {
                     isSelected ? 'ring-2' : ''
                   }`}
                   style={{
-                    background: isSelected ? 'rgba(204,255,0,0.12)' : 'var(--surface)',
+                    background: isSelected ? 'rgba(103,61,230,0.15)' : 'var(--surface)',
                     borderColor: isSelected ? 'var(--accent)' : 'var(--border-color)',
                     opacity: isDisabled ? 0.35 : 1,
                     cursor: isDisabled ? 'not-allowed' : 'pointer',
@@ -213,8 +213,8 @@ export function MatchCreator({ round }: MatchCreatorProps) {
             <div
               className="p-3 rounded-xl mt-2 flex items-center justify-between border"
               style={{
-                background: 'rgba(204,255,0,0.05)',
-                borderColor: 'rgba(204,255,0,0.25)',
+                background: 'rgba(103,61,230,0.08)',
+                borderColor: 'rgba(139,92,246,0.3)',
               }}
             >
               <div className="flex items-center gap-2">

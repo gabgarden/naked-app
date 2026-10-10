@@ -120,7 +120,7 @@ export default async function RankingPage() {
                       className={`w-full ${heightCls} rounded-t-xl mt-2 flex flex-col items-center justify-center border-t-2 transition-all`}
                       style={{
                         background: isFirst
-                          ? 'linear-gradient(to top, rgba(204,255,0,0.2), rgba(204,255,0,0.04))'
+                          ? 'linear-gradient(to top, rgba(103,61,230,0.25), rgba(103,61,230,0.04))'
                           : 'linear-gradient(to top, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
                         borderColor: borderColor,
                       }}

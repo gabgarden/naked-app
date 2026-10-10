@@ -18,7 +18,7 @@ export function PlayerForm({ player }: { player?: Player }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Name is required.');
+      setError('O nome é obrigatório.');
       return;
     }
 
@@ -43,7 +43,7 @@ export function PlayerForm({ player }: { player?: Player }) {
       router.push('/players');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred while saving the player.');
+      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar o jogador.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export function PlayerForm({ player }: { player?: Player }) {
 
   async function handleDelete() {
     if (!player) return;
-    if (!confirm(`Are you sure you want to delete ${player.name}? Historical records will also be removed.`)) {
+    if (!confirm(`Tem certeza que deseja excluir ${player.name}? Todo o histórico será removido.`)) {
       return;
     }
 
@@ -61,7 +61,7 @@ export function PlayerForm({ player }: { player?: Player }) {
       router.push('/players');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error deleting player.');
+      setError(err instanceof Error ? err.message : 'Erro ao excluir jogador.');
       setLoading(false);
     }
   }
@@ -84,14 +84,14 @@ export function PlayerForm({ player }: { player?: Player }) {
 
         <div className="space-y-1.5">
           <label className="text-sm font-semibold" style={{ color: 'var(--foreground-muted)' }}>
-            Full Name *
+            Nome Completo *
           </label>
           <input
             id="player-name"
             className="input"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. John Doe"
+            placeholder="ex: Gabriel Santos"
             required
             autoFocus
           />
@@ -99,14 +99,14 @@ export function PlayerForm({ player }: { player?: Player }) {
 
         <div className="space-y-1.5">
           <label className="text-sm font-semibold" style={{ color: 'var(--foreground-muted)' }}>
-            Nickname <span style={{ color: 'var(--muted)' }}>(optional)</span>
+            Apelido <span style={{ color: 'var(--muted)' }}>(opcional)</span>
           </label>
           <input
             id="player-nickname"
             className="input"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            placeholder="e.g. Johnny"
+            placeholder="ex: Biel"
           />
         </div>
 
@@ -122,7 +122,7 @@ export function PlayerForm({ player }: { player?: Player }) {
             {[
               { val: 1, label: '1 Estrela', desc: 'Iniciante' },
               { val: 2, label: '2 Estrelas', desc: 'Equilibrado' },
-              { val: 3, label: '3 Estrelas', desc: 'Destaque' },
+              { val: 3, label: '3 Estrelas', desc: 'Craque' },
             ].map((opt) => {
               const isSelected = stars === opt.val;
               return (
@@ -134,7 +134,7 @@ export function PlayerForm({ player }: { player?: Player }) {
                     isSelected ? 'ring-2' : ''
                   }`}
                   style={{
-                    background: isSelected ? 'rgba(204, 255, 0, 0.12)' : 'var(--surface-2)',
+                    background: isSelected ? 'rgba(103, 61, 230, 0.18)' : 'var(--surface-2)',
                     borderColor: isSelected ? 'var(--accent)' : 'var(--border-color)',
                   }}
                 >
@@ -162,7 +162,7 @@ export function PlayerForm({ player }: { player?: Player }) {
           style={{ opacity: loading ? 0.7 : 1 }}
         >
           <UserCheck className="w-5 h-5" />
-          {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Register Player'}
+          {loading ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Cadastrar Jogador'}
         </button>
 
         {isEditing && (
@@ -174,7 +174,7 @@ export function PlayerForm({ player }: { player?: Player }) {
             style={{ color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.25)' }}
           >
             <Trash2 className="w-4 h-4" />
-            Delete Player
+            Excluir Jogador
           </button>
         )}
       </div>

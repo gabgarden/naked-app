@@ -196,7 +196,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
         <div
           className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
           style={{
-            background: isFinished ? 'var(--surface-hover)' : 'rgba(204,255,0,0.15)',
+            background: isFinished ? 'var(--surface-hover)' : 'rgba(103,61,230,0.18)',
             color: isFinished ? 'var(--muted)' : 'var(--accent)',
           }}
         >
@@ -290,8 +290,8 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
               onClick={() => !isFinished && setGkModal({ open: true, team: 'A' })}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all active:scale-95 cursor-pointer max-w-full truncate"
               style={{
-                background: 'rgba(204,255,0,0.08)',
-                borderColor: 'rgba(204,255,0,0.35)',
+                background: 'rgba(103,61,230,0.12)',
+                borderColor: 'rgba(139,92,246,0.35)',
                 color: 'var(--accent)',
               }}
               title="Clique para trocar o goleiro deste time"
@@ -312,7 +312,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                 disabled={loading}
                 className="mt-2 w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
                 style={{
-                  background: 'rgba(204,255,0,0.15)',
+                  background: 'rgba(103,61,230,0.18)',
                   border: '1px solid var(--accent)',
                   color: 'var(--accent)',
                 }}
@@ -504,7 +504,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                       isCurrentGk ? 'ring-2 ring-[var(--accent)]' : 'hover:scale-[1.01]'
                     }`}
                     style={{
-                      background: isCurrentGk ? 'rgba(204,255,0,0.12)' : 'var(--surface-2)',
+                      background: isCurrentGk ? 'rgba(103,61,230,0.15)' : 'var(--surface-2)',
                       borderColor: isCurrentGk ? 'var(--accent)' : 'var(--border-color)',
                     }}
                   >

@@ -22,5 +22,5 @@ export default async function MatchLivePage({ params }: PageProps) {
     notFound();
   }
 
-  return <MatchLiveBoard initialMatch={match} matchDuration={10} />;
+  return <MatchLiveBoard initialMatch={match} matchDuration={7} />;
 }

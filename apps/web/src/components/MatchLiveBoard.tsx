@@ -7,10 +7,16 @@ import { ArrowLeft, Plus, Clock, Trophy, Trash2, Play, Pause, RotateCcw, X, Shie
 import Link from 'next/link';
 import { getDisplayName } from '../lib/utils';
 import { StarRating } from './StarRating';
+import { roundsService, RoundWithDetails } from '../services/rounds.service';
+import {
+  determinePeladaState,
+  PELADA_MATCH_DURATION_MINUTES,
+  PELADA_GOAL_LIMIT,
+} from '../lib/peladaRules';
 
 interface MatchLiveBoardProps {
   initialMatch: MatchDetails;
-  matchDuration?: number; // duration in minutes (default 10)
+  matchDuration?: number; // duration in minutes (default 7)
 }
 
 function getFirstNameOnly(name?: string | null, nickname?: string | null): string {
@@ -19,18 +25,38 @@ function getFirstNameOnly(name?: string | null, nickname?: string | null): strin
   return name.trim().split(/\s+/)[0] || name;
 }
 
-export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBoardProps) {
+export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURATION_MINUTES }: MatchLiveBoardProps) {
   const router = useRouter();
   const [match, setMatch] = useState<MatchDetails>(initialMatch);
+  const [roundDetails, setRoundDetails] = useState<RoundWithDetails | null>(null);
   const [loading, setLoading] = useState(false);
+  const [creatingNextMatch, setCreatingNextMatch] = useState(false);
   const [error, setError] = useState('');
 
-  // Timer state
+  // Timer state (7 minutes default)
   const initialSeconds = matchDuration * 60;
   const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
   const [isRunning, setIsRunning] = useState(match.status === 'in_progress');
 
   const isFinished = match.status === 'finished';
+
+  // Regra de 2 gols
+  const hasReachedTwoGoals = match.score_a >= PELADA_GOAL_LIMIT || match.score_b >= PELADA_GOAL_LIMIT;
+  const leadingTeam = match.score_a > match.score_b ? match.team_a : match.score_b > match.score_a ? match.team_b : null;
+
+  // Carrega detalhes da rodada ao finalizar para calcular a cerca e quem fica
+  useEffect(() => {
+    if (isFinished && match.round_id) {
+      roundsService.getById(match.round_id).then(setRoundDetails).catch(console.error);
+    }
+  }, [isFinished, match.round_id]);
+
+  // Se atingir 2 gols, pausa o cronômetro automaticamente
+  useEffect(() => {
+    if (hasReachedTwoGoals && isRunning && !isFinished) {
+      setIsRunning(false);
+    }
+  }, [hasReachedTwoGoals, isRunning, isFinished]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -82,7 +108,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
 
   async function handleFinish() {
     if (
-      !confirm('Tem certeza que deseja finalizar esta partida? Os pontos serão computados no ranking!')
+      !confirm('Tem certeza que deseja finalizar esta partida? Os pontos serão computados no ranking e a cerca será atualizada!')
     ) {
       return;
     }
@@ -91,12 +117,41 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
     try {
       await matchesService.finish(match.id);
       setIsRunning(false);
-      setMatch((prev) => ({ ...prev, status: 'finished' }));
+      const updatedMatch = await matchesService.getDetails(match.id);
+      setMatch(updatedMatch);
+
+      // Atualiza os dados da rodada para computar quem fica e quem entra da cerca
+      const updatedRound = await roundsService.getById(match.round_id);
+      setRoundDetails(updatedRound);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao finalizar partida.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Pelada state: quem ganha fica / empate desafiante da cerca fica
+  const peladaState = roundDetails ? determinePeladaState(roundDetails.teams, roundDetails.matches) : null;
+
+  async function handleStartNextMatch() {
+    if (!peladaState?.teamStaying || !peladaState?.teamEntering) return;
+    setCreatingNextMatch(true);
+    try {
+      const res = await matchesService.create({
+        roundId: match.round_id,
+        teamAId: peladaState.teamStaying.id,
+        teamBId: peladaState.teamEntering.id,
+        matchOrder: peladaState.nextMatchOrder,
+        goalkeeperAId: peladaState.suggestedGkAId || null,
+        goalkeeperBId: peladaState.suggestedGkBId || null,
+      });
+
+      router.push(`/rounds/${match.round_id}/matches/${res.matchId}`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao criar próxima partida.');
+    } finally {
+      setCreatingNextMatch(false);
     }
   }
 
@@ -206,16 +261,65 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
         </div>
       </div>
 
-      {error && (
+      {/* Alerta de 2 Gols Atingidos */}
+      {hasReachedTwoGoals && !isFinished && (
         <div
-          className="p-3.5 rounded-xl text-xs font-semibold text-center"
+          className="p-4 rounded-xl border flex items-center justify-between gap-3 animate-pulse"
           style={{
-            background: 'rgba(244,63,94,0.12)',
-            color: 'var(--danger)',
-            border: '1px solid rgba(244,63,94,0.2)',
+            background: 'rgba(16, 185, 129, 0.12)',
+            borderColor: 'rgba(16, 185, 129, 0.4)',
           }}
         >
-          {error}
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">⚽⚽</span>
+            <div>
+              <span className="text-xs font-black text-emerald-400 uppercase tracking-wide block">
+                Regra de 2 Gols Atingida!
+              </span>
+              <span className="text-xs text-white font-semibold">
+                {leadingTeam ? leadingTeam.name : 'Um time'} fez 2 gols! Finalize a partida.
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleFinish}
+            disabled={loading}
+            className="btn btn-primary text-xs py-2 px-3 flex-shrink-0 cursor-pointer shadow-md"
+          >
+            Finalizar Agora
+          </button>
+        </div>
+      )}
+
+      {/* Alerta de Tempo Esgotado (7 Minutos) */}
+      {secondsLeft === 0 && !hasReachedTwoGoals && !isFinished && (
+        <div
+          className="p-4 rounded-xl border flex items-center justify-between gap-3 animate-pulse"
+          style={{
+            background: 'rgba(234, 179, 8, 0.12)',
+            borderColor: 'rgba(234, 179, 8, 0.4)',
+          }}
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">⏱️</span>
+            <div>
+              <span className="text-xs font-black text-amber-400 uppercase tracking-wide block">
+                Fim dos 7 Minutos!
+              </span>
+              <span className="text-xs text-white font-semibold">
+                Tempo esgotado. Finalize para definir quem fica.
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleFinish}
+            disabled={loading}
+            className="btn btn-primary text-xs py-2 px-3 flex-shrink-0 cursor-pointer shadow-md"
+          >
+            Finalizar Partida
+          </button>
         </div>
       )}
 
@@ -456,17 +560,90 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
 
       {/* Finish match button */}
       {!isFinished && (
-        <div className="pt-4">
+        <div className="pt-2">
           <button
             type="button"
             onClick={handleFinish}
             disabled={loading}
-            className="btn btn-secondary w-full py-4 text-sm font-bold"
-            style={{ color: 'var(--danger)', borderColor: 'rgba(244,63,94,0.3)' }}
+            className="btn btn-secondary w-full py-4 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg hover:border-[var(--accent)]"
           >
-            <Trophy className="w-5 h-5" />
-            Finalizar Partida
+            <Trophy className="w-5 h-5 text-amber-400" />
+            <span>Finalizar Partida ({PELADA_MATCH_DURATION_MINUTES} min ou 2 gols)</span>
           </button>
+        </div>
+      )}
+
+      {/* POST-MATCH REI DA MESA ACTION CARD */}
+      {isFinished && (
+        <div
+          className="card p-5 space-y-4 border-2 border-[var(--accent)] shadow-2xl animate-fade-in text-center relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(103, 61, 230, 0.12), rgba(17, 18, 30, 0.95))',
+            boxShadow: '0 0 30px rgba(103, 61, 230, 0.35)',
+          }}
+        >
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--accent-light)]">
+              🏆 Fim de Partida • Rei da Mesa
+            </span>
+            <h3 className="text-lg font-black text-white">
+              {match.score_a > match.score_b
+                ? `${match.team_a?.name} venceu!`
+                : match.score_b > match.score_a
+                ? `${match.team_b?.name} venceu!`
+                : 'Partida Empatada!'}
+            </h3>
+            <p className="text-xs text-muted max-w-sm mt-0.5">
+              {peladaState?.reason || 'Regra da Pelada: Quem ganha fica. No empate, quem entrou da cerca por último fica.'}
+            </p>
+          </div>
+
+          {/* Quem Fica x Quem Entra */}
+          {peladaState?.teamStaying && peladaState?.teamEntering && (
+            <div className="p-3.5 rounded-xl border flex items-center justify-between gap-3 bg-[var(--surface-2)] border-[var(--border-color)]">
+              <div className="flex flex-col items-center flex-1 min-w-0">
+                <span className="text-[10px] font-extrabold uppercase text-emerald-400">Fica em Campo</span>
+                <span className="text-sm font-black text-white mt-0.5 truncate max-w-full">
+                  {peladaState.teamStaying.name}
+                </span>
+              </div>
+
+              <div className="text-xs font-black text-muted px-2">VS</div>
+
+              <div className="flex flex-col items-center flex-1 min-w-0">
+                <span className="text-[10px] font-extrabold uppercase text-[var(--accent-light)]">Entra da Cerca</span>
+                <span className="text-sm font-black text-white mt-0.5 truncate max-w-full">
+                  {peladaState.teamEntering.name}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Ações pós-jogo */}
+          <div className="space-y-2 pt-1">
+            {peladaState?.teamStaying && peladaState?.teamEntering ? (
+              <button
+                type="button"
+                onClick={handleStartNextMatch}
+                disabled={creatingNextMatch}
+                className="btn btn-primary btn-lg w-full flex items-center justify-center gap-2 shadow-xl cursor-pointer"
+              >
+                <Play className="w-5 h-5 fill-current" />
+                <span>
+                  {creatingNextMatch
+                    ? 'Iniciando...'
+                    : `Iniciar Próxima Partida (${PELADA_MATCH_DURATION_MINUTES} min)`}
+                </span>
+              </button>
+            ) : null}
+
+            <Link
+              href={`/rounds/${match.round_id}`}
+              className="btn btn-secondary w-full text-xs py-2.5 flex items-center justify-center gap-1.5"
+            >
+              <span>Voltar para a Rodada</span>
+            </Link>
+          </div>
         </div>
       )}
 

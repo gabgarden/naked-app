@@ -742,6 +742,38 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                 <span>Limpar</span>
               </button>
             </div>
+
+            {/* Banner de Regras da Pelada */}
+            <div
+              className="p-3.5 rounded-xl border space-y-1.5"
+              style={{
+                background: 'linear-gradient(135deg, rgba(103,61,230,0.12), rgba(15,18,25,0.85))',
+                borderColor: 'rgba(103,61,230,0.3)',
+              }}
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-purple-200">
+                <span className="text-base">⚡</span>
+                <span>Regras da Pelada (Rei da Mesa):</span>
+              </div>
+              <ul className="text-[11px] text-muted space-y-1 pl-1">
+                <li className="flex items-start gap-1.5">
+                  <span className="text-purple-400 font-bold">•</span>
+                  <span><strong>Partidas:</strong> 7 minutos corridos ou 2 gols (o que ocorrer primeiro encerra).</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-purple-400 font-bold">•</span>
+                  <span><strong>1ª Partida:</strong> 2 times serão sorteados para abrir o jogo; o 3º time aguarda de cerca.</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-purple-400 font-bold">•</span>
+                  <span><strong>Quem Ganha Fica:</strong> O vencedor permanece em campo. Em caso de empate, <strong>o time que entrou por último da cerca fica</strong>.</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-purple-400 font-bold">•</span>
+                  <span><strong>Goleiros:</strong> Rodízio justo a cada jogo (todos jogam ao menos 1 vez no gol).</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Unassigned pool / Drop Zone */}

@@ -18,9 +18,17 @@ import {
   ArrowRightLeft,
   X,
   ChevronRight,
+  Play,
+  Trophy,
 } from 'lucide-react';
 import { MatchCreator } from './MatchCreator';
 import { StarRating } from './StarRating';
+import { matchesService } from '../services/matches.service';
+import {
+  determinePeladaState,
+  PELADA_MATCH_DURATION_MINUTES,
+  PELADA_GOAL_LIMIT,
+} from '../lib/peladaRules';
 
 interface RoundDetailClientProps {
   initialRound: RoundWithDetails;
@@ -45,6 +53,30 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
 
   const isActive = round.status === 'active';
   const isFinished = round.status === 'finished';
+
+  const [creatingNext, setCreatingNext] = useState(false);
+
+  // Regra da Pelada (Rei da Mesa)
+  const peladaState = determinePeladaState(round.teams, round.matches);
+
+  async function handleStartSuggestedMatch() {
+    if (!peladaState.teamStaying || !peladaState.teamEntering) return;
+    setCreatingNext(true);
+    try {
+      const res = await matchesService.create({
+        roundId: round.id,
+        teamAId: peladaState.teamStaying.id,
+        teamBId: peladaState.teamEntering.id,
+        matchOrder: peladaState.nextMatchOrder,
+        goalkeeperAId: peladaState.suggestedGkAId || null,
+        goalkeeperBId: peladaState.suggestedGkBId || null,
+      });
+      router.push(`/rounds/${round.id}/matches/${res.matchId}`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao criar próxima partida.');
+      setCreatingNext(false);
+    }
+  }
 
   // Status transitions
   async function handleStatusChange(newStatus: 'active' | 'finished') {
@@ -244,7 +276,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
             style={{ color: 'var(--muted)' }}
           >
             <Users className="w-4 h-4 text-[var(--accent)]" />
-            Teams & Squads
+            Times & Elencos ({round.teams.length})
           </h2>
 
           {!isFinished && (
@@ -255,30 +287,51 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
               style={{ color: 'var(--accent)', borderColor: 'var(--accent)' }}
             >
               <ArrowRightLeft className="w-3.5 h-3.5" />
-              Reallocate Teams
+              Reorganizar
             </button>
           )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {round.teams.map((team) => (
-            <div key={team.id} className="card p-4 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2.5 mb-3 pb-2 border-b border-[var(--border-color)]">
-                  <span
-                    className="w-3.5 h-3.5 rounded-full shadow-sm flex-shrink-0"
-                    style={{ backgroundColor: team.color || 'var(--accent)' }}
-                  />
-                  <span className="font-bold text-sm truncate" style={{ color: 'var(--foreground)' }}>
-                    {team.name}
-                  </span>
-                  <span
-                    className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-md"
-                    style={{ background: 'var(--surface-hover)', color: 'var(--muted)' }}
-                  >
-                    {team.players.length} players
-                  </span>
-                </div>
+          {round.teams.map((team) => {
+            const isPlayingNow =
+              peladaState.currentMatch &&
+              (peladaState.currentMatch.team_a_id === team.id ||
+                peladaState.currentMatch.team_b_id === team.id);
+            const cercaIndex = peladaState.cercaQueue.findIndex((t) => t.id === team.id);
+            const isNaCerca = cercaIndex !== -1 && !isPlayingNow;
+
+            return (
+              <div key={team.id} className="card p-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border-color)]">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full shadow-sm flex-shrink-0"
+                      style={{ backgroundColor: team.color || 'var(--accent)' }}
+                    />
+                    <span className="font-bold text-sm truncate" style={{ color: 'var(--foreground)' }}>
+                      {team.name}
+                    </span>
+
+                    <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
+                      {isPlayingNow ? (
+                        <span className="text-[10px] font-black uppercase text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                          Em Campo
+                        </span>
+                      ) : isNaCerca ? (
+                        <span className="text-[10px] font-black uppercase text-amber-300 bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-500/30">
+                          Cerca #{cercaIndex + 1}
+                        </span>
+                      ) : null}
+
+                      <span
+                        className="text-[11px] font-bold px-1.5 py-0.5 rounded-md text-muted"
+                        style={{ background: 'var(--surface-hover)' }}
+                      >
+                        {team.players.length} jogs
+                      </span>
+                    </div>
+                  </div>
 
                 <div className="space-y-1.5 max-h-48 overflow-y-auto">
                   {team.players.length === 0 ? (
@@ -302,7 +355,8 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       </section>
 
@@ -314,34 +368,90 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
             style={{ color: 'var(--muted)' }}
           >
             <Swords className="w-4 h-4 text-[var(--accent)]" />
-            Matches
+            Partidas ({round.matches.length})
           </h2>
 
           {!isFinished && (
             <button
               type="button"
               onClick={() => setShowMatchCreator(true)}
-              className="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
+              className="btn btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-              New Match
+              Nova Manual
             </button>
           )}
         </div>
 
+        {/* Card inteligente da Próxima Partida (Rei da Mesa) */}
+        {!isFinished && !peladaState.currentMatch && peladaState.teamStaying && peladaState.teamEntering && (
+          <div
+            className="card p-4 border-2 border-[var(--accent)] shadow-xl space-y-3 relative overflow-hidden animate-fade-in"
+            style={{
+              background: 'linear-gradient(135deg, rgba(103,61,230,0.12), rgba(17,18,30,0.95))',
+              boxShadow: '0 0 25px rgba(103, 61, 230, 0.25)',
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[var(--accent-light)] flex items-center gap-1">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                Rei da Mesa • Próxima Partida ({PELADA_MATCH_DURATION_MINUTES} min ou 2 gols)
+              </span>
+              <span className="text-[11px] font-extrabold text-muted">Jogo #{peladaState.nextMatchOrder}</span>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border-color)]">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ backgroundColor: peladaState.teamStaying.color }} />
+                <div className="min-w-0">
+                  <span className="text-xs font-black text-white block truncate">{peladaState.teamStaying.name}</span>
+                  <span className="text-[9px] text-emerald-400 font-bold uppercase">Fica em Campo</span>
+                </div>
+              </div>
+
+              <div className="text-xs font-black text-muted px-2">VS</div>
+
+              <div className="flex items-center gap-2 flex-1 justify-end min-w-0 text-right">
+                <div className="min-w-0">
+                  <span className="text-xs font-black text-white block truncate">{peladaState.teamEntering.name}</span>
+                  <span className="text-[9px] text-[var(--accent-light)] font-bold uppercase">Entra da Cerca</span>
+                </div>
+                <span className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ backgroundColor: peladaState.teamEntering.color }} />
+              </div>
+            </div>
+
+            {peladaState.reason && (
+              <p className="text-[11px] text-muted italic px-1">
+                ℹ️ {peladaState.reason}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={handleStartSuggestedMatch}
+              disabled={creatingNext}
+              className="btn btn-primary w-full py-2.5 text-xs font-bold flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              <span>{creatingNext ? 'Iniciando Partida...' : `Iniciar Partida #${peladaState.nextMatchOrder} Agora`}</span>
+            </button>
+          </div>
+        )}
+
         {round.matches.length === 0 ? (
           <div className="card p-8 text-center space-y-3">
             <p className="text-xs" style={{ color: 'var(--muted)' }}>
-              No matches registered for this round yet.
+              Nenhuma partida registrada nesta rodada ainda.
             </p>
-            {!isFinished && (
+            {!isFinished && peladaState.teamStaying && peladaState.teamEntering && (
               <button
                 type="button"
-                onClick={() => setShowMatchCreator(true)}
-                className="btn btn-primary text-xs"
+                onClick={handleStartSuggestedMatch}
+                disabled={creatingNext}
+                className="btn btn-primary text-xs flex items-center justify-center gap-1.5 mx-auto"
               >
-                <Plus className="w-4 h-4" />
-                Create First Match
+                <Play className="w-4 h-4 fill-current" />
+                Iniciar Partida 1 (Sorteada)
               </button>
             )}
           </div>
@@ -404,7 +514,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
                             : 'var(--muted)',
                         }}
                       >
-                        {matchIsLive ? '● Live' : matchIsFinished ? 'Finished' : 'Scheduled'}
+                        {matchIsLive ? '● Ao Vivo' : matchIsFinished ? 'Finalizada' : 'Agendada'}
                       </span>
                     </div>
 

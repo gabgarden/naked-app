@@ -92,6 +92,8 @@ export class PostgresRoundRepository implements IRoundRepository {
         score_b: m.score_b,
         status: m.status,
         match_order: m.match_order,
+        goalkeeper_a_id: m.goalkeeper_a_id || null,
+        goalkeeper_b_id: m.goalkeeper_b_id || null,
         started_at: m.started_at ? new Date(m.started_at) : null,
         finished_at: m.finished_at ? new Date(m.finished_at) : null,
       })),
@@ -139,17 +141,23 @@ export class PostgresRoundRepository implements IRoundRepository {
         }
       }
 
-      // Criar partidas automaticamente (round-robin entre os times)
+      // Sorteio da 1ª Partida (Rei da Mesa):
+      // Sorteia 2 dos times para abrir a rodada, enquanto o 3º (e demais) fica de cerca!
       const teamIds = await sql`SELECT id FROM teams WHERE round_id = ${roundId}`;
-      let matchOrder = 1;
-      for (let i = 0; i < teamIds.length; i++) {
-        for (let j = i + 1; j < teamIds.length; j++) {
-          const matchId = uuid();
-          await sql`
-            INSERT INTO matches (id, round_id, team_a_id, team_b_id, score_a, score_b, status, match_order)
-            VALUES (${matchId}, ${roundId}, ${teamIds[i].id}, ${teamIds[j].id}, 0, 0, 'pending', ${matchOrder++})
-          `;
-        }
+      if (teamIds.length >= 2) {
+        const shuffled = [...teamIds].sort(() => Math.random() - 0.5);
+        const matchId = uuid();
+
+        // Sorteia o goleiro inicial para cada time da 1ª partida
+        const playersA = await sql`SELECT player_id FROM team_players WHERE team_id = ${shuffled[0].id} ORDER BY RANDOM() LIMIT 1`;
+        const playersB = await sql`SELECT player_id FROM team_players WHERE team_id = ${shuffled[1].id} ORDER BY RANDOM() LIMIT 1`;
+        const gkAId = playersA.length > 0 ? playersA[0].player_id : null;
+        const gkBId = playersB.length > 0 ? playersB[0].player_id : null;
+
+        await sql`
+          INSERT INTO matches (id, round_id, team_a_id, team_b_id, score_a, score_b, status, match_order, goalkeeper_a_id, goalkeeper_b_id)
+          VALUES (${matchId}, ${roundId}, ${shuffled[0].id}, ${shuffled[1].id}, 0, 0, 'pending', 1, ${gkAId}, ${gkBId})
+        `;
       }
 
       return { success: true, roundId };

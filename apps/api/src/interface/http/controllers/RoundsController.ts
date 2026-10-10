@@ -61,6 +61,16 @@ export class RoundsController {
     res.json({ success: true });
   }
 
+  async updateTeam(req: Request, res: Response) {
+    const { name, color } = req.body;
+    if (!name && !color) {
+      return res.status(400).json({ error: 'name or color is required.' });
+    }
+    const result = await roundRepository.updateTeam(req.params.teamId, { name, color });
+    if (!result.success) return res.status(400).json({ error: result.error });
+    res.json({ success: true });
+  }
+
   async remove(req: Request, res: Response) {
     try {
       const result = await roundRepository.delete(req.params.id);

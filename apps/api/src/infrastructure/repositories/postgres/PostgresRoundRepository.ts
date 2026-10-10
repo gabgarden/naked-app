@@ -196,6 +196,25 @@ export class PostgresRoundRepository implements IRoundRepository {
     }
   }
 
+  public async updateTeam(
+    teamId: string,
+    data: { name?: string; color?: string },
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (data.name && data.color) {
+        await sql`UPDATE teams SET name = ${data.name}, color = ${data.color} WHERE id = ${teamId}`;
+      } else if (data.name) {
+        await sql`UPDATE teams SET name = ${data.name} WHERE id = ${teamId}`;
+      } else if (data.color) {
+        await sql`UPDATE teams SET color = ${data.color} WHERE id = ${teamId}`;
+      }
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { success: false, error: message };
+    }
+  }
+
   public async delete(id: string): Promise<{ success: boolean; error?: string }> {
     try {
       // 1. Revert stats from player_stats using player_round_stats for this round

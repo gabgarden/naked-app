@@ -10,6 +10,9 @@ router.patch('/:id/status', (req, res) => roundsController.updateStatus(req, res
 router.patch('/:id/teams/:teamId/players', (req, res) =>
   roundsController.updateTeamPlayers(req, res),
 );
+router.patch('/:id/teams/:teamId', (req, res) =>
+  roundsController.updateTeam(req, res),
+);
 router.delete('/:id', (req, res) => roundsController.remove(req, res));
 
 export default router;

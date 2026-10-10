@@ -22,6 +22,8 @@ import {
   Trophy,
   Sparkles,
   Trash2,
+  Shirt,
+  Palette,
 } from 'lucide-react';
 import { MatchCreator } from './MatchCreator';
 import { StarRating } from './StarRating';
@@ -32,6 +34,8 @@ import {
   PELADA_MATCH_DURATION_MINUTES,
   PELADA_GOAL_LIMIT,
 } from '../lib/peladaRules';
+import { BibColorPickerModal } from './BibColorPickerModal';
+import { BibColor } from '../lib/teamColors';
 
 interface RoundDetailClientProps {
   initialRound: RoundWithDetails;
@@ -54,6 +58,55 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
     player: TeamPlayer;
     fromTeamId: string;
   } | null>(null);
+
+  // Bib color picker modal
+  const [bibPicker, setBibPicker] = useState<{
+    open: boolean;
+    teamId: string;
+    teamName: string;
+    currentColor?: string;
+  }>({ open: false, teamId: '', teamName: '', currentColor: '' });
+
+  async function handleUpdateTeamBib(bib: BibColor, updatedName?: string) {
+    if (!bibPicker.teamId) return;
+    const teamId = bibPicker.teamId;
+
+    // Optimistically update
+    setRound((prev) => ({
+      ...prev,
+      teams: prev.teams.map((t) =>
+        t.id === teamId
+          ? {
+              ...t,
+              color: bib.hex,
+              name: updatedName || t.name,
+            }
+          : t,
+      ),
+    }));
+
+    setTeamsState((prev) =>
+      prev.map((t) =>
+        t.id === teamId
+          ? {
+              ...t,
+              color: bib.hex,
+              name: updatedName || t.name,
+            }
+          : t,
+      ),
+    );
+
+    try {
+      await roundsService.updateTeam(round.id, teamId, {
+        color: bib.hex,
+        name: updatedName,
+      });
+      router.refresh();
+    } catch (err) {
+      console.error('Erro ao atualizar cor do colete:', err);
+    }
+  }
 
   const isActive = round.status === 'active';
   const isFinished = round.status === 'finished';
@@ -355,13 +408,45 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
               <div key={team.id} className="card p-4 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border-color)]">
-                    <span
-                      className="w-3.5 h-3.5 rounded-full shadow-sm flex-shrink-0"
-                      style={{ backgroundColor: team.color || 'var(--accent)' }}
-                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBibPicker({
+                          open: true,
+                          teamId: team.id,
+                          teamName: team.name,
+                          currentColor: team.color,
+                        })
+                      }
+                      className="group relative flex items-center justify-center cursor-pointer transition-transform active:scale-95 flex-shrink-0"
+                      title="Clique para escolher a cor do colete deste time"
+                    >
+                      <span
+                        className="w-5 h-5 rounded-md shadow-md flex items-center justify-center border border-white/20 transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: team.color || 'var(--accent)' }}
+                      >
+                        <Shirt className="w-3 h-3 text-white drop-shadow-sm" />
+                      </span>
+                    </button>
                     <span className="font-bold text-sm truncate" style={{ color: 'var(--foreground)' }}>
                       {team.name}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBibPicker({
+                          open: true,
+                          teamId: team.id,
+                          teamName: team.name,
+                          currentColor: team.color,
+                        })
+                      }
+                      className="text-[10px] font-bold text-muted hover:text-white px-1.5 py-0.5 rounded-md hover:bg-white/5 flex items-center gap-1 transition-all cursor-pointer"
+                      title="Alterar cor do colete"
+                    >
+                      <Palette className="w-3 h-3 text-[var(--accent-light)]" />
+                      <span className="hidden sm:inline">Colete</span>
+                    </button>
 
                     <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
                       {isPlayingNow ? (
@@ -775,6 +860,15 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
           </div>
         </div>
       )}
+
+      {/* Bib Color Picker Modal */}
+      <BibColorPickerModal
+        isOpen={bibPicker.open}
+        onClose={() => setBibPicker((prev) => ({ ...prev, open: false }))}
+        currentColor={bibPicker.currentColor}
+        teamName={bibPicker.teamName}
+        onSelectColor={handleUpdateTeamBib}
+      />
     </div>
   );
 }

@@ -3,7 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { matchesService, MatchDetails, MatchTeamPlayer } from '../services/matches.service';
-import { ArrowLeft, Plus, Clock, Trophy, Trash2, Play, Pause, RotateCcw, X, Shield, RefreshCw } from 'lucide-react';
+import {
+  ArrowLeft,
+  Plus,
+  Clock,
+  Trophy,
+  Trash2,
+  Play,
+  Pause,
+  RotateCcw,
+  X,
+  Shield,
+  RefreshCw,
+  Shirt,
+  Palette,
+} from 'lucide-react';
 import Link from 'next/link';
 import { getDisplayName } from '../lib/utils';
 import { StarRating } from './StarRating';
@@ -13,6 +27,8 @@ import {
   PELADA_MATCH_DURATION_MINUTES,
   PELADA_GOAL_LIMIT,
 } from '../lib/peladaRules';
+import { BibColorPickerModal } from './BibColorPickerModal';
+import { findBibColor, BibColor } from '../lib/teamColors';
 
 interface MatchLiveBoardProps {
   initialMatch: MatchDetails;
@@ -105,6 +121,47 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
     open: boolean;
     team: 'A' | 'B';
   }>({ open: false, team: 'A' });
+
+  // Colete Color Picker modal state
+  const [bibColorModal, setBibColorModal] = useState<{
+    open: boolean;
+    teamId: string;
+    teamName: string;
+    currentColor?: string;
+  }>({ open: false, teamId: '', teamName: '', currentColor: '' });
+
+  async function handleSelectBibColor(newBib: BibColor, updatedName?: string) {
+    if (!bibColorModal.teamId) return;
+    const teamId = bibColorModal.teamId;
+
+    // Optimistically update local match state
+    setMatch((prev) => {
+      const next = { ...prev };
+      if (next.team_a?.id === teamId) {
+        next.team_a = {
+          ...next.team_a,
+          color: newBib.hex,
+          name: updatedName || next.team_a.name,
+        };
+      } else if (next.team_b?.id === teamId) {
+        next.team_b = {
+          ...next.team_b,
+          color: newBib.hex,
+          name: updatedName || next.team_b.name,
+        };
+      }
+      return next;
+    });
+
+    try {
+      await roundsService.updateTeam(match.round_id, teamId, {
+        color: newBib.hex,
+        name: updatedName,
+      });
+    } catch (err) {
+      console.error('Erro ao atualizar cor do colete:', err);
+    }
+  }
 
   async function handleFinish() {
     if (
@@ -236,6 +293,9 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
   const gkModalTeamObj = gkModal.team === 'A' ? match.team_a : match.team_b;
   const gkModalPlayers = gkModalTeamObj?.players || [];
   const activeGkId = gkModal.team === 'A' ? match.goalkeeper_a_id : match.goalkeeper_b_id;
+
+  const bibA = findBibColor(match.team_a?.color);
+  const bibB = findBibColor(match.team_b?.color);
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -372,16 +432,52 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
         <div className="flex items-center justify-between w-full">
           {/* Team A */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-xs font-bold border-2 shadow-sm text-center px-1"
-              style={{
-                borderColor: match.team_a?.color || 'var(--accent)',
-                background: 'var(--surface-hover)',
-                color: 'var(--foreground)',
-              }}
+            <button
+              type="button"
+              onClick={() =>
+                setBibColorModal({
+                  open: true,
+                  teamId: match.team_a?.id || '',
+                  teamName: match.team_a?.name || 'Time A',
+                  currentColor: match.team_a?.color,
+                })
+              }
+              className="group flex flex-col items-center gap-1.5 cursor-pointer transition-transform active:scale-95 focus:outline-none"
+              title="Clique para alterar a cor do colete deste time"
             >
-              <span className="truncate">{match.team_a?.name || 'Time A'}</span>
-            </div>
+              {/* Modern Bib Emblem */}
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center relative shadow-lg transition-all group-hover:scale-105"
+                style={{
+                  background: bibA.bgGradient,
+                  color: bibA.textColor,
+                  border: `2px solid ${bibA.borderColor}`,
+                  boxShadow: `0 0 22px ${bibA.glowColor}`,
+                }}
+              >
+                <Shirt className="w-8 h-8 drop-shadow-md" />
+                <div
+                  className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-transform group-hover:scale-110"
+                  style={{ background: 'rgba(15, 18, 28, 0.9)', color: 'var(--accent-light)' }}
+                >
+                  <Palette className="w-3 h-3" />
+                </div>
+              </div>
+
+              {/* Team Name outside the box, bold and clear */}
+              <div className="flex flex-col items-center max-w-[130px] px-1">
+                <span className="text-xs font-black uppercase tracking-wider text-white truncate max-w-full text-center">
+                  {match.team_a?.name || 'Time A'}
+                </span>
+                <span
+                  className="text-[10px] font-bold tracking-tight opacity-90 truncate max-w-full text-center"
+                  style={{ color: bibA.hex }}
+                >
+                  {bibA.name}
+                </span>
+              </div>
+            </button>
+
             <span
               className="stat-number text-5xl font-black my-1"
               style={{ color: 'var(--foreground)' }}
@@ -433,16 +529,52 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
 
           {/* Team B */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-xs font-bold border-2 shadow-sm text-center px-1"
-              style={{
-                borderColor: match.team_b?.color || 'var(--secondary)',
-                background: 'var(--surface-hover)',
-                color: 'var(--foreground)',
-              }}
+            <button
+              type="button"
+              onClick={() =>
+                setBibColorModal({
+                  open: true,
+                  teamId: match.team_b?.id || '',
+                  teamName: match.team_b?.name || 'Time B',
+                  currentColor: match.team_b?.color,
+                })
+              }
+              className="group flex flex-col items-center gap-1.5 cursor-pointer transition-transform active:scale-95 focus:outline-none"
+              title="Clique para alterar a cor do colete deste time"
             >
-              <span className="truncate">{match.team_b?.name || 'Time B'}</span>
-            </div>
+              {/* Modern Bib Emblem */}
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center relative shadow-lg transition-all group-hover:scale-105"
+                style={{
+                  background: bibB.bgGradient,
+                  color: bibB.textColor,
+                  border: `2px solid ${bibB.borderColor}`,
+                  boxShadow: `0 0 22px ${bibB.glowColor}`,
+                }}
+              >
+                <Shirt className="w-8 h-8 drop-shadow-md" />
+                <div
+                  className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-transform group-hover:scale-110"
+                  style={{ background: 'rgba(15, 18, 28, 0.9)', color: 'var(--accent-light)' }}
+                >
+                  <Palette className="w-3 h-3" />
+                </div>
+              </div>
+
+              {/* Team Name outside the box, bold and clear */}
+              <div className="flex flex-col items-center max-w-[130px] px-1">
+                <span className="text-xs font-black uppercase tracking-wider text-white truncate max-w-full text-center">
+                  {match.team_b?.name || 'Time B'}
+                </span>
+                <span
+                  className="text-[10px] font-bold tracking-tight opacity-90 truncate max-w-full text-center"
+                  style={{ color: bibB.hex }}
+                >
+                  {bibB.name}
+                </span>
+              </div>
+            </button>
+
             <span
               className="stat-number text-5xl font-black my-1"
               style={{ color: 'var(--foreground)' }}
@@ -807,6 +939,15 @@ export function MatchLiveBoard({ initialMatch, matchDuration = PELADA_MATCH_DURA
           </div>
         </div>
       )}
+
+      {/* Colete Color Picker Modal */}
+      <BibColorPickerModal
+        isOpen={bibColorModal.open}
+        onClose={() => setBibColorModal((prev) => ({ ...prev, open: false }))}
+        currentColor={bibColorModal.currentColor}
+        teamName={bibColorModal.teamName}
+        onSelectColor={handleSelectBibColor}
+      />
     </div>
   );
 }

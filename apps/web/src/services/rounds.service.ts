@@ -61,6 +61,8 @@ export const roundsService = {
     apiPatch(`/api/rounds/${id}/status`, { status }),
   updateTeamPlayers: (roundId: string, teamId: string, playerIds: string[]) =>
     apiPatch(`/api/rounds/${roundId}/teams/${teamId}/players`, { playerIds }),
+  updateTeam: (roundId: string, teamId: string, data: { name?: string; color?: string }) =>
+    apiPatch(`/api/rounds/${roundId}/teams/${teamId}`, data),
   delete: (id: string) => apiDelete(`/api/rounds/${id}`),
 };
 

@@ -18,6 +18,7 @@ import {
   ArrowRightLeft,
   GripVertical,
 } from 'lucide-react';
+import { StarRating } from './StarRating';
 
 const DEFAULT_TEAMS = [
   { id: 'team1', name: 'Time Roxo', color: '#8b5cf6', players: [] as Player[] },
@@ -265,7 +266,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
       ghost.style.fontWeight = 'bold';
       ghost.style.fontSize = '12px';
       ghost.style.boxShadow = '0 8px 24px rgba(0,0,0,0.5)';
-      ghost.innerText = `${touchPlayerRef.current.nickname || touchPlayerRef.current.name} ⭐${touchPlayerRef.current.stars ?? 2}`;
+      ghost.innerText = `${touchPlayerRef.current.nickname || touchPlayerRef.current.name} (★${touchPlayerRef.current.stars ?? 2})`;
       document.body.appendChild(ghost);
       touchGhostRef.current = ghost;
     }
@@ -570,7 +571,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                       key={s}
                       type="button"
                       onClick={() => setQuickStars(s)}
-                      className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                      className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-1.5 ${
                         quickStars === s ? 'ring-1' : ''
                       }`}
                       style={{
@@ -579,7 +580,8 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                         color: quickStars === s ? '#fff' : 'var(--muted)',
                       }}
                     >
-                      {'⭐'.repeat(s)} ({s === 1 ? 'Básico' : s === 2 ? 'Médio' : 'Craque'})
+                      <StarRating stars={s} size={13} />
+                      <span className="text-[10px]">({s === 1 ? 'Básico' : s === 2 ? 'Médio' : 'Craque'})</span>
                     </button>
                   ))}
                 </div>
@@ -635,9 +637,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                           >
                             {player.name}
                           </p>
-                          <span className="text-[10px] text-amber-400 font-bold">
-                            {'⭐'.repeat(player.stars ?? 2)}
-                          </span>
+                          <StarRating stars={player.stars ?? 2} size={11} />
                         </div>
                         {player.nickname && (
                           <p className="text-[11px] truncate" style={{ color: 'var(--muted)' }}>
@@ -750,11 +750,11 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
             onDragOver={(e) => handleDragOver(e, 'unassigned')}
             onDrop={(e) => handleDrop(e, 'unassigned')}
             className={`card p-3 space-y-2 transition-all ${
-              dragOverTeamId === 'unassigned' ? 'ring-2 ring-amber-400 border-amber-400' : ''
+              dragOverTeamId === 'unassigned' ? 'ring-2 ring-[var(--accent)] border-[var(--accent)]' : ''
             }`}
             style={{
-              borderColor: unassignedPlayers.length > 0 ? 'var(--warning)' : 'var(--border-color)',
-              background: dragOverTeamId === 'unassigned' ? 'rgba(234,179,8,0.12)' : 'rgba(234,179,8,0.03)',
+              borderColor: unassignedPlayers.length > 0 ? 'rgba(139,92,246,0.3)' : 'var(--border-color)',
+              background: dragOverTeamId === 'unassigned' ? 'rgba(103,61,230,0.15)' : 'rgba(103,61,230,0.03)',
             }}
           >
             <div className="flex items-center justify-between px-1">
@@ -785,9 +785,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                 >
                   <GripVertical className="w-3 h-3 text-muted opacity-50" />
                   <span>{p.nickname || p.name}</span>
-                  <span className="text-[10px] text-amber-400">
-                    {'⭐'.repeat(p.stars ?? 2)}
-                  </span>
+                  <StarRating stars={p.stars ?? 2} size={11} />
                 </div>
               ))}
 
@@ -850,7 +848,9 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                         style={{ background: 'var(--surface)', color: 'var(--foreground)' }}
                       >
                         <span>{team.players.length} jogs</span>
-                        <span className="text-amber-400 font-extrabold">• {totalStars} ⭐</span>
+                        <span className="text-purple-300 font-extrabold flex items-center gap-1">
+                          • {totalStars} <StarRating stars={1} max={1} size={11} />
+                        </span>
                       </span>
 
                       {teams.length > 2 && (
@@ -886,9 +886,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                       >
                         <GripVertical className="w-3 h-3 text-muted opacity-40" />
                         <span>{p.nickname || p.name}</span>
-                        <span className="text-[10px] text-amber-400">
-                          {'⭐'.repeat(p.stars ?? 2)}
-                        </span>
+                        <StarRating stars={p.stars ?? 2} size={11} />
                         <button
                           type="button"
                           onClick={(e) => {
@@ -915,16 +913,14 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
 
           {/* Quick Transfer Modal / Sheet */}
           {transferPlayer && (
-            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-              <div className="card w-full max-w-sm p-5 space-y-4 animate-slide-in-bottom border-2 border-[var(--accent)]">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+              <div className="card w-full max-w-sm p-5 space-y-4 animate-scale-in border-2 border-[var(--accent)] shadow-2xl">
                 <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: 'var(--border-color)' }}>
                   <div>
                     <span className="text-[11px] font-bold uppercase text-muted">Mover Jogador</span>
                     <h3 className="font-extrabold text-base text-white flex items-center gap-2">
                       <span>{transferPlayer.nickname || transferPlayer.name}</span>
-                      <span className="text-amber-400 text-xs font-bold">
-                        {'⭐'.repeat(transferPlayer.stars ?? 2)}
-                      </span>
+                      <StarRating stars={transferPlayer.stars ?? 2} size={12} />
                     </h3>
                   </div>
                   <button
@@ -961,8 +957,8 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                           <span className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
                           <span className="font-bold text-sm text-white">{t.name}</span>
                         </div>
-                        <span className="text-xs text-muted font-bold">
-                          {t.players.length} jogs • {totalStars} ⭐
+                        <span className="text-xs text-muted font-bold flex items-center gap-1">
+                          {t.players.length} jogs • {totalStars} <StarRating stars={1} max={1} size={11} />
                         </span>
                       </button>
                     );
@@ -974,7 +970,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                       removeFromTeam(transferPlayer);
                       setTransferPlayer(null);
                     }}
-                    className="w-full p-2.5 rounded-xl border text-center text-xs font-bold text-amber-400 border-amber-400/30 hover:bg-amber-400/10 transition-colors"
+                    className="w-full p-2.5 rounded-xl border text-center text-xs font-bold text-purple-300 border-purple-500/30 hover:bg-purple-500/10 transition-colors"
                   >
                     Mover para Banco / Sem Time
                   </button>

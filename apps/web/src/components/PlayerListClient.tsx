@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { UserPlus, ChevronRight, X, Sparkles, Trophy, Calendar, Check, ExternalLink, Edit2 } from 'lucide-react';
+import { UserPlus, ChevronRight, X, Sparkles, Check, ExternalLink } from 'lucide-react';
 import { Player, playersService, PlayerProfile } from '../services/players.service';
-import { getDisplayName } from '../lib/utils';
+import { StarRating } from './StarRating';
 
 interface PlayerListClientProps {
   initialPlayers: Player[];
@@ -17,6 +18,24 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [updatingStars, setUpdatingStars] = useState(false);
   const [starsUpdatedFeedback, setStarsUpdatedFeedback] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Preserve scroll position when opening and closing the modal
+  useEffect(() => {
+    if (!selectedPlayer) return;
+    const currentScrollY = window.scrollY;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.scrollTo(0, currentScrollY);
+    };
+  }, [selectedPlayer]);
 
   // When clicking a player, open the stats card and load details
   async function handleSelectPlayer(player: Player) {
@@ -27,7 +46,6 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
       const details = await playersService.getById(player.id);
       setPlayerDetails(details);
     } catch {
-      // Fallback with just the basic player data
       setPlayerDetails({
         ...player,
         stats: null,
@@ -53,8 +71,8 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
       await playersService.update(selectedPlayer.id, { stars: newStars });
       setStarsUpdatedFeedback(true);
       setTimeout(() => setStarsUpdatedFeedback(false), 2000);
-    } catch (err) {
-      alert('Erro ao atualizar estrelas do jogador.');
+    } catch {
+      alert('Erro ao atualizar classificação do jogador.');
     } finally {
       setUpdatingStars(false);
     }
@@ -107,18 +125,16 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
             <div
               key={player.id}
               onClick={() => handleSelectPlayer(player)}
-              className={`flex items-center justify-between px-4 py-3.5 transition-colors cursor-pointer hover:bg-[var(--surface-hover)] ${
+              className={`flex items-center justify-between px-4 py-3.5 transition-colors cursor-pointer hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)] ${
                 i < players.length - 1 ? 'border-b border-[var(--border-color)]' : ''
               }`}
             >
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 pr-2">
                 <div className="flex items-center gap-2">
                   <p className="font-bold text-sm truncate text-white">
                     {player.name}
                   </p>
-                  <span className="text-xs text-amber-400 font-bold flex-shrink-0">
-                    {'⭐'.repeat(player.stars ?? 2)}
-                  </span>
+                  <StarRating stars={player.stars ?? 2} size={12} />
                 </div>
                 {player.nickname && (
                   <p className="text-xs truncate" style={{ color: 'var(--muted)' }}>
@@ -127,7 +143,7 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <span className="text-[11px] font-semibold text-muted">
                   Stats & Estrelas
                 </span>
@@ -138,10 +154,19 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
         </div>
       )}
 
-      {/* PLAYER STATS & DISCRETE STAR EDITOR CARD (MODAL / BOTTOM SHEET) */}
-      {selectedPlayer && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="card w-full max-w-md overflow-hidden flex flex-col p-5 space-y-4 animate-slide-in-bottom border-2 border-[var(--accent)] shadow-2xl relative">
+      {/* DYNAMIC VIEWPORT-CENTERED PLAYER STATS & DISCRETE STAR MODAL */}
+      {mounted && selectedPlayer && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+          onClick={() => setSelectedPlayer(null)}
+        >
+          <div
+            className="card w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col p-5 space-y-4 border-2 border-[var(--accent)] shadow-2xl relative animate-scale-in my-auto"
+            style={{
+              boxShadow: '0 0 35px rgba(103, 61, 230, 0.45)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: 'var(--border-color)' }}>
               <div className="flex-1 min-w-0 pr-3">
@@ -161,13 +186,13 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
               <button
                 type="button"
                 onClick={() => setSelectedPlayer(null)}
-                className="p-1.5 rounded-lg text-muted hover:text-white transition-colors"
+                className="p-1.5 rounded-lg text-muted hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Discrete Star Rating Selector */}
+            {/* Discrete Star Rating Selector with Hostinger Purple Stars */}
             <div
               className="p-3.5 rounded-xl border flex flex-col gap-2 transition-all"
               style={{
@@ -177,7 +202,7 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
                   Nível Técnico (Estrelas):
                 </span>
                 {starsUpdatedFeedback ? (
@@ -186,12 +211,12 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
                   </span>
                 ) : (
                   <span className="text-[10px] text-muted">
-                    Toque na estrela para alterar
+                    Toque para alterar
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center justify-center gap-2 pt-1">
+              <div className="grid grid-cols-3 gap-2 pt-1">
                 {[1, 2, 3].map((starVal) => {
                   const isCurrent = (selectedPlayer.stars ?? 2) === starVal;
                   return (
@@ -200,10 +225,10 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
                       type="button"
                       onClick={() => handleSetStars(starVal)}
                       disabled={updatingStars}
-                      className={`flex-1 py-2 px-2 rounded-lg border text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                      className={`py-2 px-2 rounded-xl border text-xs font-extrabold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                         isCurrent
-                          ? 'ring-2 ring-[var(--accent)] shadow-md scale-105'
-                          : 'opacity-70 hover:opacity-100 hover:scale-100'
+                          ? 'ring-2 ring-[var(--accent)] shadow-lg shadow-purple-900/40 scale-[1.02]'
+                          : 'opacity-70 hover:opacity-100 hover:scale-[1.01]'
                       }`}
                       style={{
                         background: isCurrent ? 'var(--accent)' : 'var(--surface-2)',
@@ -211,8 +236,8 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
                         color: isCurrent ? '#ffffff' : 'var(--muted-light)',
                       }}
                     >
-                      <span>{'⭐'.repeat(starVal)}</span>
-                      <span className="text-[10px] ml-0.5">
+                      <StarRating stars={starVal} size={14} />
+                      <span className="text-[10px] font-bold leading-tight">
                         {starVal === 1 ? 'Básico' : starVal === 2 ? 'Médio' : 'Craque'}
                       </span>
                     </button>
@@ -248,8 +273,8 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
                   </div>
 
                   <div className="card p-2.5 text-center bg-[var(--surface-2)]">
-                    <span className="text-[10px] font-bold text-amber-400 uppercase block">Pontos</span>
-                    <span className="text-lg font-black text-amber-400 stat-number">
+                    <span className="text-[10px] font-bold text-purple-300 uppercase block">Pontos</span>
+                    <span className="text-lg font-black text-purple-300 stat-number">
                       {(playerDetails?.stats?.total_wins ?? 0) * 3 + (playerDetails?.stats?.total_draws ?? 0)}
                     </span>
                   </div>
@@ -293,13 +318,14 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
               <button
                 type="button"
                 onClick={() => setSelectedPlayer(null)}
-                className="btn btn-secondary text-xs py-2.5 px-4"
+                className="btn btn-secondary text-xs py-2.5 px-4 cursor-pointer"
               >
                 Fechar
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

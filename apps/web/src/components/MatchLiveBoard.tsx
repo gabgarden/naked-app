@@ -6,6 +6,7 @@ import { matchesService, MatchDetails, MatchTeamPlayer } from '../services/match
 import { ArrowLeft, Plus, Clock, Trophy, Trash2, Play, Pause, RotateCcw, X, Shield, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { getDisplayName } from '../lib/utils';
+import { StarRating } from './StarRating';
 
 interface MatchLiveBoardProps {
   initialMatch: MatchDetails;
@@ -471,8 +472,8 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
 
       {/* GOALKEEPER SWITCHER MODAL */}
       {gkModal.open && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="card w-full max-w-sm overflow-hidden flex flex-col max-h-[85vh] animate-slide-in-bottom border-2 border-[var(--accent)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="card w-full max-w-sm overflow-hidden flex flex-col max-h-[85vh] animate-scale-in border-2 border-[var(--accent)] shadow-2xl">
             <div
               className="p-4 flex items-center justify-between"
               style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}
@@ -514,9 +515,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                         <span className="font-bold text-xs text-white block">
                           {getFirstNameOnly(player.name, player.nickname)}
                         </span>
-                        <span className="text-[10px] text-amber-400 font-semibold">
-                          {'⭐'.repeat(player.stars ?? 2)}
-                        </span>
+                        <StarRating stars={player.stars ?? 2} size={11} />
                       </div>
                     </div>
                     {isCurrentGk && (
@@ -534,8 +533,8 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
 
       {/* GOAL REGISTRATION MODAL */}
       {goalModal.open && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="card w-full max-w-sm overflow-hidden flex flex-col max-h-[85vh] animate-slide-in-bottom border-2 border-[var(--accent)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="card w-full max-w-sm overflow-hidden flex flex-col max-h-[85vh] animate-scale-in border-2 border-[var(--accent)] shadow-2xl">
             <div
               className="p-4 flex items-center justify-between"
               style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}
@@ -580,9 +579,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                           <span className="font-bold text-xs text-white">
                             {getFirstNameOnly(player.name, player.nickname)}
                           </span>
-                          <span className="text-[10px] text-amber-400">
-                            {'⭐'.repeat(player.stars ?? 2)}
-                          </span>
+                          <StarRating stars={player.stars ?? 2} size={11} />
                           {isGk && <span className="text-xs" title="Goleiro">🧤</span>}
                         </div>
                         <span className="text-xl">⚽</span>
@@ -622,9 +619,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                         <span className="font-bold text-xs text-white">
                           {getFirstNameOnly(player.name, player.nickname)}
                         </span>
-                        <span className="text-[10px] text-amber-400">
-                          {'⭐'.repeat(player.stars ?? 2)}
-                        </span>
+                        <StarRating stars={player.stars ?? 2} size={11} />
                       </div>
                       <span className="text-xl">🎯</span>
                     </button>

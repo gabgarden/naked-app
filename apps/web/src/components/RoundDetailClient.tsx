@@ -20,6 +20,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { MatchCreator } from './MatchCreator';
+import { StarRating } from './StarRating';
 
 interface RoundDetailClientProps {
   initialRound: RoundWithDetails;
@@ -294,9 +295,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
                         <span className="font-bold truncate" style={{ color: 'var(--foreground)' }}>
                           {p.nickname?.trim() || p.name.trim().split(/\s+/)[0]}
                         </span>
-                        <span className="text-[10px] text-amber-400 font-semibold">
-                          {'⭐'.repeat(p.stars ?? 2)}
-                        </span>
+                        <StarRating stars={p.stars ?? 2} size={11} />
                       </div>
                     ))
                   )}
@@ -561,7 +560,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
                             }}
                           >
                             <span>{p.nickname?.trim() || p.name.trim().split(/\s+/)[0]}</span>
-                            <span className="text-[10px] text-amber-400">{'⭐'.repeat(p.stars ?? 2)}</span>
+                            <StarRating stars={p.stars ?? 2} size={11} />
                             <ArrowRightLeft className="w-3 h-3 opacity-60" />
                           </button>
                         );

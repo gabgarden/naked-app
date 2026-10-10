@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { playersService, Player } from '../services/players.service';
 import { UserCheck, Trash2 } from 'lucide-react';
+import { StarRating } from './StarRating';
 
 export function PlayerForm({ player }: { player?: Player }) {
   const router = useRouter();
@@ -114,9 +115,7 @@ export function PlayerForm({ player }: { player?: Player }) {
         <div className="space-y-2 pt-1">
           <label className="text-sm font-semibold flex items-center justify-between" style={{ color: 'var(--foreground-muted)' }}>
             <span>Classificação (Nível Técnico)</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>
-              {stars === 1 ? '⭐ Nível 1 (Iniciante)' : stars === 2 ? '⭐⭐ Nível 2 (Médio)' : '⭐⭐⭐ Nível 3 (Craque)'}
-            </span>
+            <StarRating stars={stars} size={14} showText />
           </label>
           <div className="grid grid-cols-3 gap-2">
             {[
@@ -130,17 +129,15 @@ export function PlayerForm({ player }: { player?: Player }) {
                   key={opt.val}
                   type="button"
                   onClick={() => setStars(opt.val)}
-                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                    isSelected ? 'ring-2' : ''
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1.5 ${
+                    isSelected ? 'ring-2 ring-[var(--accent)] shadow-lg shadow-purple-900/30' : ''
                   }`}
                   style={{
-                    background: isSelected ? 'rgba(103, 61, 230, 0.18)' : 'var(--surface-2)',
+                    background: isSelected ? 'rgba(103, 61, 230, 0.2)' : 'var(--surface-2)',
                     borderColor: isSelected ? 'var(--accent)' : 'var(--border-color)',
                   }}
                 >
-                  <div className="text-base">
-                    {'⭐'.repeat(opt.val)}
-                  </div>
+                  <StarRating stars={opt.val} size={15} />
                   <span className="text-xs font-bold text-white leading-tight">
                     {opt.label}
                   </span>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Sparkles, Check } from 'lucide-react';
 import { playersService } from '../services/players.service';
+import { StarRating } from './StarRating';
 
 interface PlayerProfileStarsProps {
   playerId: string;
@@ -31,14 +32,14 @@ export function PlayerProfileStars({ playerId, initialStars }: PlayerProfileStar
 
   return (
     <div
-      className="mt-3 py-2 px-3.5 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-2 transition-all max-w-sm mx-auto w-full"
+      className="mt-3 py-2 px-3.5 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-2.5 transition-all max-w-sm mx-auto w-full"
       style={{
         background: 'rgba(103, 61, 230, 0.08)',
         borderColor: 'rgba(139, 92, 246, 0.3)',
       }}
     >
       <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
         <span>Nível Técnico:</span>
         {feedback && (
           <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-0.5 animate-fade-in">
@@ -57,9 +58,9 @@ export function PlayerProfileStars({ playerId, initialStars }: PlayerProfileStar
               onClick={() => handleSetStars(starVal)}
               disabled={updating}
               title={`Definir como nível ${starVal}`}
-              className={`px-2 py-1 rounded-lg border text-xs font-extrabold flex items-center gap-0.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg border text-xs font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                 isSelected
-                  ? 'ring-2 ring-[var(--accent)] shadow-md scale-105'
+                  ? 'ring-2 ring-[var(--accent)] shadow-md shadow-purple-900/40 scale-105'
                   : 'opacity-70 hover:opacity-100'
               }`}
               style={{
@@ -68,8 +69,8 @@ export function PlayerProfileStars({ playerId, initialStars }: PlayerProfileStar
                 color: isSelected ? '#ffffff' : 'var(--muted-light)',
               }}
             >
-              <span>{'⭐'.repeat(starVal)}</span>
-              <span className="text-[9px] ml-0.5">
+              <StarRating stars={starVal} size={12} />
+              <span className="text-[10px] ml-0.5 font-bold">
                 {starVal === 1 ? '1' : starVal === 2 ? '2' : '3'}
               </span>
             </button>

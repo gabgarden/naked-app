@@ -1,44 +1,58 @@
-# Production overrides for Hostinger / VPS
-# Usage:
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
+# Production Compose for Hostinger / VPS
+# Pode rodar diretamente:
+#   docker compose -f docker-compose.prod.yml up -d --build
 #
-# TLS/SSL is terminated by the host Nginx (/etc/nginx/sites-available/naked.conf),
-# which proxies to the container Nginx on port :8084.
-# Certificates are issued and renewed by the host Certbot (certbot --nginx).
+# TLS/SSL é terminado pelo Nginx da VPS, que faz proxy reverso para a porta :8084.
 
 services:
   postgres:
+    image: postgres:16-alpine
     container_name: naked-db
-    ports: !reset []
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-naked_secure_pass_2026}
       POSTGRES_DB: ${POSTGRES_DB:-naked_app}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/api/src/infrastructure/database/postgres/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-naked_app}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
     container_name: naked-api
-    ports: !reset []
+    restart: unless-stopped
     environment:
       PORT: 3001
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-naked_secure_pass_2026}
       DB_NAME: ${POSTGRES_DB:-naked_app}
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-naked_app}
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-naked_secure_pass_2026}@postgres:5432/${POSTGRES_DB:-naked_app}
       CORS_ORIGIN: "*"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
     container_name: naked-web
-    ports: !reset []
+    restart: unless-stopped
     environment:
       PORT: 3000
       INTERNAL_API_URL: http://api:3001
       NEXT_PUBLIC_API_URL: ""
-
-  adminer:
-    profiles: ["debug"]
-    ports: !reset []
+    depends_on:
+      - api
 
   nginx:
     image: nginx:1.27-alpine
@@ -51,3 +65,6 @@ services:
     depends_on:
       - web
       - api
+
+volumes:
+  postgres_data:

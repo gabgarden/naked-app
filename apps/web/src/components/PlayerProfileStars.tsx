@@ -17,14 +17,17 @@ export function PlayerProfileStars({ playerId, initialStars }: PlayerProfileStar
 
   async function handleSetStars(newStars: number) {
     if (stars === newStars || updating) return;
+    const previousStars = stars;
     setUpdating(true);
     setStars(newStars);
     try {
       await playersService.update(playerId, { stars: newStars });
       setFeedback(true);
       setTimeout(() => setFeedback(false), 2000);
-    } catch {
-      alert('Erro ao atualizar estrelas do jogador.');
+    } catch (err) {
+      console.error('Erro ao atualizar estrelas do jogador:', err);
+      setStars(previousStars);
+      alert('Erro ao atualizar estrelas do jogador no servidor.');
     } finally {
       setUpdating(false);
     }

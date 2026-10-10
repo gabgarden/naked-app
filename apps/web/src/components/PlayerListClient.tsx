@@ -61,6 +61,7 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
     if (!selectedPlayer || updatingStars) return;
     if (selectedPlayer.stars === newStars) return;
 
+    const previousStars = selectedPlayer.stars;
     setUpdatingStars(true);
     // Optimistic update
     const updatedPlayer = { ...selectedPlayer, stars: newStars };
@@ -71,8 +72,12 @@ export function PlayerListClient({ initialPlayers }: PlayerListClientProps) {
       await playersService.update(selectedPlayer.id, { stars: newStars });
       setStarsUpdatedFeedback(true);
       setTimeout(() => setStarsUpdatedFeedback(false), 2000);
-    } catch {
-      alert('Erro ao atualizar classificação do jogador.');
+    } catch (err) {
+      console.error('Erro ao atualizar estrelas do jogador:', err);
+      // Reverte caso a requisição falhe
+      setSelectedPlayer((prev) => (prev ? { ...prev, stars: previousStars } : null));
+      setPlayers((prev) => prev.map((p) => (p.id === selectedPlayer.id ? { ...p, stars: previousStars } : p)));
+      alert('Erro ao atualizar classificação do jogador no servidor.');
     } finally {
       setUpdatingStars(false);
     }

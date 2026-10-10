@@ -128,14 +128,19 @@ export class PostgresPlayerRepository implements IPlayerRepository {
     data: UpdatePlayerData,
   ): Promise<{ success: boolean; data?: Player; error?: string }> {
     const starRating = data.stars !== undefined ? Math.max(1, Math.min(3, Number(data.stars))) : null;
+    const hasName = data.name !== undefined && Boolean(data.name.trim());
+    const hasNickname = data.nickname !== undefined;
+    const hasAvatar = data.avatar_url !== undefined;
+    const hasStars = starRating !== null;
+
     try {
       const rows = await sql`
         UPDATE players
         SET
-          name = COALESCE(${data.name?.trim() || null}, name),
-          nickname = ${data.nickname !== undefined ? (data.nickname?.trim() || null) : sql`nickname`},
-          avatar_url = ${data.avatar_url !== undefined ? (data.avatar_url?.trim() || null) : sql`avatar_url`},
-          stars = ${starRating !== null ? starRating : sql`stars`}
+          name = CASE WHEN ${hasName} THEN ${data.name ? data.name.trim() : null} ELSE name END,
+          nickname = CASE WHEN ${hasNickname} THEN ${data.nickname ? data.nickname.trim() : null} ELSE nickname END,
+          avatar_url = CASE WHEN ${hasAvatar} THEN ${data.avatar_url ? data.avatar_url.trim() : null} ELSE avatar_url END,
+          stars = CASE WHEN ${hasStars} THEN ${starRating} ELSE stars END
         WHERE id = ${id}
         RETURNING *
       `;
@@ -157,9 +162,9 @@ export class PostgresPlayerRepository implements IPlayerRepository {
         const rows = await sql`
           UPDATE players
           SET
-            name = COALESCE(${data.name?.trim() || null}, name),
-            nickname = ${data.nickname !== undefined ? (data.nickname?.trim() || null) : sql`nickname`},
-            avatar_url = ${data.avatar_url !== undefined ? (data.avatar_url?.trim() || null) : sql`avatar_url`}
+            name = CASE WHEN ${hasName} THEN ${data.name ? data.name.trim() : null} ELSE name END,
+            nickname = CASE WHEN ${hasNickname} THEN ${data.nickname ? data.nickname.trim() : null} ELSE nickname END,
+            avatar_url = CASE WHEN ${hasAvatar} THEN ${data.avatar_url ? data.avatar_url.trim() : null} ELSE avatar_url END
           WHERE id = ${id}
           RETURNING *
         `;

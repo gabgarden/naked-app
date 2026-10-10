@@ -60,6 +60,16 @@ export class RoundsController {
     if (!result.success) return res.status(400).json({ error: result.error });
     res.json({ success: true });
   }
+
+  async remove(req: Request, res: Response) {
+    try {
+      const result = await roundRepository.delete(req.params.id);
+      if (!result.success) return res.status(400).json({ error: result.error });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: 'Error deleting round.' });
+    }
+  }
 }
 
 export const roundsController = new RoundsController();

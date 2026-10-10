@@ -338,13 +338,24 @@ main {
   font-size: 0.9375rem;
   padding: 0.625rem 0.875rem;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
   outline: none;
 }
 .input::placeholder { color: var(--muted); }
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+  box-shadow: 0 0 0 3px rgba(103, 61, 230, 0.25);
+}
+
+input[type="date"].input {
+  color-scheme: dark;
+  max-width: 100%;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  min-height: 2.75rem;
 }
 
 /* ============================================================

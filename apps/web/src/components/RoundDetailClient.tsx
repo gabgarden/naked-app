@@ -21,6 +21,7 @@ import {
   Play,
   Trophy,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 import { MatchCreator } from './MatchCreator';
 import { StarRating } from './StarRating';
@@ -40,6 +41,7 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
   const router = useRouter();
   const [round, setRound] = useState<RoundWithDetails>(initialRound);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
 
   // Modals
@@ -99,6 +101,27 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
       setError(err instanceof Error ? err.message : 'Error updating status.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Delete / cancel round (test mode)
+  async function handleDeleteRound() {
+    if (
+      !confirm(
+        'Deseja realmente excluir esta rodada? Todas as partidas registradas e estatísticas serão canceladas e revertidas.',
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await roundsService.delete(round.id);
+      router.push('/rounds');
+      router.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao excluir rodada.');
+      setDeleting(false);
     }
   }
 
@@ -227,6 +250,17 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
             {isActive && <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />}
             {isActive ? 'Live' : isFinished ? 'Finished' : 'Draft'}
           </div>
+
+          <button
+            type="button"
+            onClick={handleDeleteRound}
+            disabled={deleting || loading}
+            className="btn btn-secondary text-xs py-1.5 px-2.5 flex items-center gap-1.5 transition-all text-red-400 hover:text-red-300 hover:border-red-500/40"
+            title="Excluir rodada (modo testes)"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{deleting ? 'Excluindo...' : 'Excluir'}</span>
+          </button>
         </div>
       </div>
 

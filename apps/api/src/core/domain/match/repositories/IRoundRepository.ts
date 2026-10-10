@@ -58,4 +58,5 @@ export interface IRoundRepository {
     teamId: string,
     playerIds: string[],
   ): Promise<{ success: boolean; error?: string }>;
+  delete(id: string): Promise<{ success: boolean; error?: string }>;
 }

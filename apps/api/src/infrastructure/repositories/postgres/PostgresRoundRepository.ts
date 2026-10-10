@@ -195,4 +195,34 @@ export class PostgresRoundRepository implements IRoundRepository {
       return { success: false, error: message };
     }
   }
+
+  public async delete(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      // 1. Revert stats from player_stats using player_round_stats for this round
+      await sql`
+        UPDATE player_stats ps
+        SET
+          total_games = GREATEST(0, ps.total_games - prs.games),
+          total_goals = GREATEST(0, ps.total_goals - prs.goals),
+          total_assists = GREATEST(0, ps.total_assists - prs.assists),
+          total_wins = GREATEST(0, ps.total_wins - prs.wins),
+          total_draws = GREATEST(0, ps.total_draws - prs.draws),
+          total_losses = GREATEST(0, ps.total_losses - prs.losses),
+          clean_sheets = GREATEST(0, COALESCE(ps.clean_sheets, 0) - COALESCE(prs.clean_sheets, 0))
+        FROM player_round_stats prs
+        WHERE ps.player_id = prs.player_id AND prs.round_id = ${id}
+      `;
+
+      // 2. Explicitly clean dependent records to avoid any FK violation order issues
+      await sql`DELETE FROM player_round_stats WHERE round_id = ${id}`;
+      await sql`DELETE FROM matches WHERE round_id = ${id}`;
+      await sql`DELETE FROM teams WHERE round_id = ${id}`;
+      await sql`DELETE FROM rounds WHERE id = ${id}`;
+
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { success: false, error: message };
+    }
+  }
 }

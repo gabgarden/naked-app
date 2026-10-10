@@ -17,6 +17,7 @@ import {
   RotateCcw,
   ArrowRightLeft,
   GripVertical,
+  HelpCircle,
 } from 'lucide-react';
 import { StarRating } from './StarRating';
 import { balanceTeams } from '../lib/teamBalancer';
@@ -48,6 +49,7 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
   const [teams, setTeams] = useState(DEFAULT_TEAMS);
   const [draggedPlayerId, setDraggedPlayerId] = useState<string | null>(null);
   const [dragOverTeamId, setDragOverTeamId] = useState<string | null>(null);
+  const [showRulesModal, setShowRulesModal] = useState(false);
 
   // Quick transfer modal (tap-to-move for touch convenience)
   const [transferPlayer, setTransferPlayer] = useState<Player | null>(null);
@@ -399,16 +401,18 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
             Informações da Pelada
           </h2>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 w-full min-w-0 max-w-full">
             <label className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
               Data da Partida
             </label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="input"
-            />
+            <div className="w-full max-w-full overflow-hidden">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="input w-full max-w-full"
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -664,15 +668,32 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
                   Segure e arraste até o time, ou toque para transferir rapidamente
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={addTeam}
-                className="text-xs font-bold flex items-center gap-1 transition-colors hover:text-[var(--accent)]"
-                style={{ color: 'var(--accent)' }}
-              >
-                <Plus className="w-4 h-4" />
-                Adicionar Time
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRulesModal(true)}
+                  className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  style={{
+                    background: 'rgba(103, 61, 230, 0.1)',
+                    borderColor: 'rgba(103, 61, 230, 0.3)',
+                    color: 'var(--accent-light)',
+                  }}
+                  title="Ver regras da rodada"
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Regras</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={addTeam}
+                  className="text-xs font-bold flex items-center gap-1 transition-colors hover:text-[var(--accent)]"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar Time
+                </button>
+              </div>
             </div>
 
             {/* Smart Draw Actions */}
@@ -680,65 +701,111 @@ export function RoundCreator({ initialPlayers }: { initialPlayers: Player[] }) {
               <button
                 type="button"
                 onClick={handleBalancedDraw}
-                className="btn btn-primary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
-                title="Sorteia dividindo craques, médios e básicos com equilíbrio matemático perfeito"
+                className="py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer text-white border overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, #673DE6 0%, #8B5CF6 100%)',
+                  borderColor: 'rgba(139, 92, 246, 0.4)',
+                  boxShadow: '0 4px 14px rgba(103, 61, 230, 0.3)',
+                }}
+                title="Distribui os jogadores dividindo craques e mantendo médias iguais"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>⚡ Sorteio Equilibrado</span>
+                <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="truncate">Equilibrar</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleRandomDraw}
-                className="btn btn-secondary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-                title="Reembaralha os jogadores gerando uma nova combinação sempre equilibrada"
+                className="py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer border bg-[var(--surface-2)] border-[var(--border-color)] text-white hover:border-[var(--accent)] overflow-hidden"
+                title="Gera uma nova combinação aleatória sempre equilibrada"
               >
-                <Shuffle className="w-3.5 h-3.5" />
-                <span>🎲 Reembaralhar</span>
+                <Shuffle className="w-3.5 h-3.5 flex-shrink-0 text-purple-400" />
+                <span className="truncate">Reembaralhar</span>
               </button>
 
               <button
                 type="button"
                 onClick={clearAllTeams}
-                className="btn btn-secondary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 hover:text-rose-400"
+                className="py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer border bg-[var(--surface-2)] border-[var(--border-color)] text-muted-light hover:text-rose-400 hover:border-rose-500/30 overflow-hidden"
                 title="Limpar todos os times"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Limpar</span>
+                <RotateCcw className="w-3.5 h-3.5 flex-shrink-0 text-muted" />
+                <span className="truncate">Limpar</span>
               </button>
             </div>
 
-            {/* Banner de Regras da Pelada */}
-            <div
-              className="p-3.5 rounded-xl border space-y-1.5"
-              style={{
-                background: 'linear-gradient(135deg, rgba(103,61,230,0.12), rgba(15,18,25,0.85))',
-                borderColor: 'rgba(103,61,230,0.3)',
-              }}
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-purple-200">
-                <span className="text-base">⚡</span>
-                <span>Regras da Pelada (Rei da Mesa):</span>
+            {/* Modal de Regras da Pelada */}
+            {showRulesModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+                <div
+                  className="card w-full max-w-md max-h-[85vh] overflow-y-auto border-2 border-[var(--accent)] shadow-2xl p-5 space-y-4 animate-scale-in"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(15, 18, 28, 0.98), rgba(22, 17, 38, 0.98))',
+                    boxShadow: '0 0 35px rgba(103, 61, 230, 0.4)',
+                  }}
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center"
+                        style={{ background: 'rgba(103, 61, 230, 0.25)', color: 'var(--accent)' }}
+                      >
+                        <HelpCircle className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-base text-white">Regras da Pelada</h3>
+                        <p className="text-[11px] text-muted">Formato Rei da Mesa</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowRulesModal(false)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 text-muted hover:text-white"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-2.5 text-xs">
+                    <div className="p-3 rounded-xl border bg-[var(--surface-2)] border-[var(--border-color)]">
+                      <span className="font-bold text-white block mb-0.5">Duração das Partidas</span>
+                      <p className="text-muted text-[11px]">
+                        <strong>7 minutos corridos</strong> ou <strong>2 gols</strong>. O que ocorrer primeiro encerra imediatamente o jogo.
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-xl border bg-[var(--surface-2)] border-[var(--border-color)]">
+                      <span className="font-bold text-white block mb-0.5">Sorteio da 1ª Partida</span>
+                      <p className="text-muted text-[11px]">
+                        Dois times são sorteados para abrir o jogo. O 3º time (e demais) aguardam de cerca.
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-xl border bg-[var(--surface-2)] border-[var(--border-color)]">
+                      <span className="font-bold text-white block mb-0.5">Quem Ganha Fica</span>
+                      <p className="text-muted text-[11px]">
+                        O vencedor permanece em campo. Em caso de empate, <strong>o time que entrou por último da cerca fica</strong>.
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-xl border bg-[var(--surface-2)] border-[var(--border-color)]">
+                      <span className="font-bold text-white block mb-0.5">Rodízio Justo de Goleiros</span>
+                      <p className="text-muted text-[11px]">
+                        O sistema escala os goleiros de forma rotativa para que todos joguem ao menos uma vez no gol.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowRulesModal(false)}
+                    className="btn btn-primary w-full py-2.5 text-xs font-bold"
+                  >
+                    Entendido
+                  </button>
+                </div>
               </div>
-              <ul className="text-[11px] text-muted space-y-1 pl-1">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-purple-400 font-bold">•</span>
-                  <span><strong>Partidas:</strong> 7 minutos corridos ou 2 gols (o que ocorrer primeiro encerra).</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-purple-400 font-bold">•</span>
-                  <span><strong>1ª Partida:</strong> 2 times serão sorteados para abrir o jogo; o 3º time aguarda de cerca.</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-purple-400 font-bold">•</span>
-                  <span><strong>Quem Ganha Fica:</strong> O vencedor permanece em campo. Em caso de empate, <strong>o time que entrou por último da cerca fica</strong>.</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-purple-400 font-bold">•</span>
-                  <span><strong>Goleiros:</strong> Rodízio justo a cada jogo (todos jogam ao menos 1 vez no gol).</span>
-                </li>
-              </ul>
-            </div>
+            )}
           </div>
 
           {/* Unassigned pool / Drop Zone */}

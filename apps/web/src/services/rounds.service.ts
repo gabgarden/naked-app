@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch } from './api';
+import { apiGet, apiPost, apiPatch, apiDelete } from './api';
 
 export interface Round {
   id: string;
@@ -61,6 +61,7 @@ export const roundsService = {
     apiPatch(`/api/rounds/${id}/status`, { status }),
   updateTeamPlayers: (roundId: string, teamId: string, playerIds: string[]) =>
     apiPatch(`/api/rounds/${roundId}/teams/${teamId}/players`, { playerIds }),
+  delete: (id: string) => apiDelete(`/api/rounds/${id}`),
 };
 
 // Compatibility export

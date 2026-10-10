@@ -14,7 +14,7 @@ import { MatchStatus } from '../../../core/domain/match/value-objects/MatchStatu
 export class MatchesController {
   async create(req: Request, res: Response) {
     try {
-      const { roundId, teamAId, teamBId, matchOrder } = req.body;
+      const { roundId, teamAId, teamBId, matchOrder, goalkeeperAId, goalkeeperBId } = req.body;
       if (!roundId || !teamAId || !teamBId) {
         return res.status(400).json({ error: 'roundId, teamAId, and teamBId are required.' });
       }
@@ -28,6 +28,8 @@ export class MatchesController {
         score: Score.zero(),
         status: MatchStatus.create('pending'),
         matchOrder: matchOrder ?? 1,
+        goalkeeperAId: goalkeeperAId || null,
+        goalkeeperBId: goalkeeperBId || null,
       });
 
       await matchRepository.create(match);
@@ -35,6 +37,16 @@ export class MatchesController {
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Error creating match.' });
+    }
+  }
+
+  async updateGoalkeepers(req: Request, res: Response) {
+    try {
+      const { goalkeeperAId, goalkeeperBId } = req.body;
+      await matchRepository.updateGoalkeepers(req.params.id, goalkeeperAId, goalkeeperBId);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: 'Error updating goalkeepers.' });
     }
   }
 

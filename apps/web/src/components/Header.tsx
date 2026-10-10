@@ -2,6 +2,8 @@
 
 import { usePathname } from 'next/navigation';
 
+import NakedLogo from './NakedLogo';
+
 const pageTitles: Record<string, string> = {
   '/': 'Naked App',
   '/players': 'Players',
@@ -33,29 +35,22 @@ export default function Header() {
       id="app-header"
       style={{
         height: 'var(--header-height)',
-        background: 'rgba(13, 15, 20, 0.95)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        background: 'rgba(8, 10, 16, 0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border-color)',
       }}
       className="sticky top-0 z-40"
     >
       <div className="relative max-w-2xl mx-auto h-full flex items-center px-4">
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
-            style={{
-              background: 'linear-gradient(135deg, var(--accent-dark), var(--accent))',
-              color: '#fff',
-            }}
-          >
-            ⚽
-          </div>
+        <div className="flex items-center gap-3">
+          <NakedLogo size={32} />
           <span
-            className="text-xl font-bold tracking-wide"
+            className="text-xl font-bold tracking-wide uppercase"
             style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               color: 'var(--foreground)',
+              letterSpacing: '0.04em',
             }}
           >
             {title}

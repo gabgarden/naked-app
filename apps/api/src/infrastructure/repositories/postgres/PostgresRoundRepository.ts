@@ -44,7 +44,7 @@ export class PostgresRoundRepository implements IRoundRepository {
     const round = roundRows[0];
 
     const teamRows = await sql`
-      SELECT t.*, tp.player_id, p.id as p_id, p.name as p_name, p.nickname as p_nickname
+      SELECT t.*, tp.player_id, p.id as p_id, p.name as p_name, p.nickname as p_nickname, COALESCE(p.stars, 2) as p_stars
       FROM teams t
       LEFT JOIN team_players tp ON tp.team_id = t.id
       LEFT JOIN players p ON p.id = tp.player_id
@@ -68,6 +68,7 @@ export class PostgresRoundRepository implements IRoundRepository {
           id: row.p_id,
           name: row.p_name,
           nickname: row.p_nickname,
+          stars: Number(row.p_stars ?? 2),
         });
       }
     }

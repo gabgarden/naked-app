@@ -8,6 +8,8 @@ export interface MatchDetails {
   score_a: number;
   score_b: number;
   match_order: number;
+  goalkeeper_a_id: string | null;
+  goalkeeper_b_id: string | null;
   started_at: Date | null;
   finished_at: Date | null;
   created_at: Date;
@@ -20,7 +22,7 @@ export interface TeamWithPlayers {
   id: string;
   name: string;
   color: string;
-  players: { id: string; name: string; nickname: string | null; avatar_url: string | null }[];
+  players: { id: string; name: string; nickname: string | null; avatar_url: string | null; stars?: number }[];
 }
 
 export interface EventWithPlayers {
@@ -40,6 +42,7 @@ export interface IMatchRepository {
   getMatchDetails(matchId: string): Promise<MatchDetails | null>;
   create(match: Match): Promise<void>;
   save(match: Match): Promise<void>;
+  updateGoalkeepers(matchId: string, gkAId?: string | null, gkBId?: string | null): Promise<void>;
   saveEvent(event: MatchEvent): Promise<void>;
   deleteEvent(eventId: string): Promise<void>;
 }

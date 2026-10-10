@@ -1,7 +1,6 @@
-import { Trophy, Medal, Flame, Users } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { rankingService, RankingEntry } from '../../services/ranking.service';
-import { getInitials, getDisplayName } from '../../lib/utils';
 
 export const revalidate = 0;
 
@@ -88,33 +87,26 @@ export default async function RankingPage() {
                     href={`/players/${player.player_id}`}
                     className="flex flex-col items-center w-1/3 max-w-[110px] group transition-transform hover:-translate-y-1"
                   >
-                    {/* Avatar & Medal */}
+                    {/* Medal / Position Badge */}
                     <div className="relative mb-2 flex flex-col items-center">
                       <div
-                        className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-black shadow-lg relative border-2"
+                        className="px-3 py-1 rounded-lg flex items-center justify-center text-xs font-black shadow-md border"
                         style={{
                           borderColor: borderColor,
-                          background: 'var(--surface)',
-                          color: isFirst ? 'var(--accent)' : 'var(--foreground)',
+                          background: medalBg,
+                          color: isFirst ? '#080A10' : '#fff',
                         }}
                       >
-                        {getInitials(player.name)}
-                      </div>
-
-                      <div
-                        className="absolute -bottom-2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-md z-10"
-                        style={{ background: medalBg }}
-                      >
-                        {position}
+                        {position === 1 ? '🥇 1º' : position === 2 ? '🥈 2º' : '🥉 3º'}
                       </div>
                     </div>
 
-                    {/* Name & Points */}
+                    {/* First Name & Points */}
                     <p
-                      className="font-bold text-xs truncate w-full text-center mt-1"
+                      className="font-extrabold text-sm truncate w-full text-center mt-1"
                       style={{ color: 'var(--foreground)' }}
                     >
-                      {getDisplayName(player.name, player.nickname)}
+                      {player.nickname?.trim() || player.name.trim().split(/\s+/)[0]}
                     </p>
                     <p
                       className="text-xs font-black"
@@ -128,7 +120,7 @@ export default async function RankingPage() {
                       className={`w-full ${heightCls} rounded-t-xl mt-2 flex flex-col items-center justify-center border-t-2 transition-all`}
                       style={{
                         background: isFirst
-                          ? 'linear-gradient(to top, rgba(249,115,22,0.18), rgba(249,115,22,0.06))'
+                          ? 'linear-gradient(to top, rgba(204,255,0,0.2), rgba(204,255,0,0.04))'
                           : 'linear-gradient(to top, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
                         borderColor: borderColor,
                       }}
@@ -198,27 +190,10 @@ export default async function RankingPage() {
                       {rank}
                     </span>
 
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                      style={{
-                        background: isTop3
-                          ? 'linear-gradient(135deg, var(--accent-dark), var(--accent))'
-                          : 'var(--surface-hover)',
-                        color: isTop3 ? '#fff' : 'var(--foreground)',
-                      }}
-                    >
-                      {getInitials(player.name)}
-                    </div>
-
                     <div className="min-w-0">
-                      <p className="font-semibold text-xs truncate" style={{ color: 'var(--foreground)' }}>
-                        {player.name}
+                      <p className="font-bold text-sm truncate" style={{ color: 'var(--foreground)' }}>
+                        {player.nickname?.trim() || player.name.trim().split(/\s+/)[0]}
                       </p>
-                      {player.nickname && (
-                        <p className="text-[10px] truncate" style={{ color: 'var(--muted)' }}>
-                          {player.nickname}
-                        </p>
-                      )}
                     </div>
                   </div>
 

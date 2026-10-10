@@ -11,7 +11,7 @@ import {
 export class PostgresPlayerRepository implements IPlayerRepository {
   public async findAll(): Promise<Player[]> {
     const rows = await sql`
-      SELECT id, name, nickname, avatar_url, created_at
+      SELECT id, name, nickname, avatar_url, COALESCE(stars, 2) as stars, created_at
       FROM players
       ORDER BY name ASC
     `;
@@ -22,6 +22,7 @@ export class PostgresPlayerRepository implements IPlayerRepository {
           name: r.name,
           nickname: r.nickname,
           avatarUrl: r.avatar_url,
+          stars: Number(r.stars ?? 2),
           createdAt: new Date(r.created_at),
         }),
     );
@@ -29,7 +30,7 @@ export class PostgresPlayerRepository implements IPlayerRepository {
 
   public async findById(id: string): Promise<Player | null> {
     const rows = await sql`
-      SELECT id, name, nickname, avatar_url, created_at
+      SELECT id, name, nickname, avatar_url, COALESCE(stars, 2) as stars, created_at
       FROM players
       WHERE id = ${id}
       LIMIT 1
@@ -41,6 +42,7 @@ export class PostgresPlayerRepository implements IPlayerRepository {
       name: r.name,
       nickname: r.nickname,
       avatarUrl: r.avatar_url,
+      stars: Number(r.stars ?? 2),
       createdAt: new Date(r.created_at),
     });
   }
@@ -49,12 +51,14 @@ export class PostgresPlayerRepository implements IPlayerRepository {
     data: CreatePlayerData,
   ): Promise<{ success: boolean; data?: Player; error?: string }> {
     try {
+      const starRating = data.stars ? Math.max(1, Math.min(3, Number(data.stars))) : 2;
       const rows = await sql`
-        INSERT INTO players (name, nickname, avatar_url)
+        INSERT INTO players (name, nickname, avatar_url, stars)
         VALUES (
           ${data.name.trim()},
           ${data.nickname?.trim() || null},
-          ${data.avatar_url?.trim() || null}
+          ${data.avatar_url?.trim() || null},
+          ${starRating}
         )
         RETURNING *
       `;
@@ -66,6 +70,7 @@ export class PostgresPlayerRepository implements IPlayerRepository {
           name: r.name,
           nickname: r.nickname,
           avatarUrl: r.avatar_url,
+          stars: Number(r.stars ?? starRating),
           createdAt: new Date(r.created_at),
         }),
       };
@@ -80,16 +85,18 @@ export class PostgresPlayerRepository implements IPlayerRepository {
     data: UpdatePlayerData,
   ): Promise<{ success: boolean; data?: Player; error?: string }> {
     try {
+      const starRating = data.stars !== undefined ? Math.max(1, Math.min(3, Number(data.stars))) : null;
       const rows = await sql`
         UPDATE players
         SET
           name = COALESCE(${data.name?.trim() || null}, name),
           nickname = ${data.nickname !== undefined ? (data.nickname?.trim() || null) : sql`nickname`},
-          avatar_url = ${data.avatar_url !== undefined ? (data.avatar_url?.trim() || null) : sql`avatar_url`}
+          avatar_url = ${data.avatar_url !== undefined ? (data.avatar_url?.trim() || null) : sql`avatar_url`},
+          stars = ${starRating !== null ? starRating : sql`stars`}
         WHERE id = ${id}
         RETURNING *
       `;
-      if (rows.length === 0) return { success: false, error: 'Jogador não encontrado.' };
+      if (rows.length === 0) return { success: false, error: 'Player not found.' };
       const r = rows[0];
       return {
         success: true,
@@ -98,6 +105,7 @@ export class PostgresPlayerRepository implements IPlayerRepository {
           name: r.name,
           nickname: r.nickname,
           avatarUrl: r.avatar_url,
+          stars: Number(r.stars ?? 2),
           createdAt: new Date(r.created_at),
         }),
       };

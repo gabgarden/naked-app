@@ -288,21 +288,14 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
                     team.players.map((p) => (
                       <div
                         key={p.id}
-                        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs"
+                        className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs"
                         style={{ background: 'var(--surface-hover)' }}
                       >
-                        <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                          style={{
-                            background: 'var(--surface)',
-                            color: 'var(--accent)',
-                            border: '1px solid var(--border-color)',
-                          }}
-                        >
-                          {getInitials(p.name)}
-                        </div>
-                        <span className="font-semibold truncate" style={{ color: 'var(--foreground)' }}>
-                          {getDisplayName(p.name, p.nickname)}
+                        <span className="font-bold truncate" style={{ color: 'var(--foreground)' }}>
+                          {p.nickname?.trim() || p.name.trim().split(/\s+/)[0]}
+                        </span>
+                        <span className="text-[10px] text-amber-400 font-semibold">
+                          {'⭐'.repeat(p.stars ?? 2)}
                         </span>
                       </div>
                     ))
@@ -567,7 +560,8 @@ export function RoundDetailClient({ initialRound }: RoundDetailClientProps) {
                               border: '1px solid var(--border-color)',
                             }}
                           >
-                            <span>{getDisplayName(p.name, p.nickname)}</span>
+                            <span>{p.nickname?.trim() || p.name.trim().split(/\s+/)[0]}</span>
+                            <span className="text-[10px] text-amber-400">{'⭐'.repeat(p.stars ?? 2)}</span>
                             <ArrowRightLeft className="w-3 h-3 opacity-60" />
                           </button>
                         );

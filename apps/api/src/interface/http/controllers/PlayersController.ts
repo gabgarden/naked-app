@@ -26,18 +26,23 @@ export class PlayersController {
   }
 
   async create(req: Request, res: Response) {
-    const { name, nickname, avatar_url } = req.body;
+    const { name, nickname, avatar_url, stars } = req.body;
     if (!name?.trim()) {
       return res.status(400).json({ error: 'Name is required.' });
     }
-    const result = await playerRepository.create({ name, nickname, avatar_url });
+    const result = await playerRepository.create({ name, nickname, avatar_url, stars: stars ? Number(stars) : 2 });
     if (!result.success) return res.status(400).json({ error: result.error });
     res.status(201).json({ data: result.data });
   }
 
   async update(req: Request, res: Response) {
-    const { name, nickname, avatar_url } = req.body;
-    const result = await playerRepository.update(req.params.id, { name, nickname, avatar_url });
+    const { name, nickname, avatar_url, stars } = req.body;
+    const result = await playerRepository.update(req.params.id, {
+      name,
+      nickname,
+      avatar_url,
+      stars: stars !== undefined ? Number(stars) : undefined,
+    });
     if (!result.success) return res.status(400).json({ error: result.error });
     res.json({ data: result.data });
   }

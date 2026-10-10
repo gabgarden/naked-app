@@ -77,6 +77,15 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           {getDisplayName(playerProfile.name, playerProfile.nickname)}
         </h1>
 
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-sm text-amber-400 font-bold">
+            {'⭐'.repeat(playerProfile.stars ?? 2)}
+          </span>
+          <span className="text-xs text-muted">
+            ({playerProfile.stars === 1 ? 'Nível 1 - Básico' : playerProfile.stars === 2 ? 'Nível 2 - Médio' : 'Nível 3 - Craque'})
+          </span>
+        </div>
+
         {playerProfile.nickname && (
           <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
             {playerProfile.name}

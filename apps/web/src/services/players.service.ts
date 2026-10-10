@@ -5,6 +5,7 @@ export interface Player {
   name: string;
   nickname: string | null;
   avatar_url: string | null;
+  stars: number;
   created_at: string;
 }
 
@@ -37,9 +38,11 @@ export interface PlayerRoundStats {
 export const playersService = {
   list: () => apiGet<Player[]>('/api/players'),
   getById: (id: string) => apiGet<PlayerProfile>(`/api/players/${id}`),
-  create: (data: { name: string; nickname?: string; avatar_url?: string }) =>
+  create: (data: { name: string; nickname?: string; avatar_url?: string; stars?: number }) =>
     apiPost<Player>('/api/players', data),
-  update: (id: string, data: { name?: string; nickname?: string | null; avatar_url?: string | null }) =>
-    apiPatch<Player>(`/api/players/${id}`, data),
+  update: (
+    id: string,
+    data: { name?: string; nickname?: string | null; avatar_url?: string | null; stars?: number },
+  ) => apiPatch<Player>(`/api/players/${id}`, data),
   delete: (id: string) => apiDelete(`/api/players/${id}`),
 };

@@ -9,5 +9,6 @@ router.patch('/:id/start', (req, res) => matchesController.start(req, res));
 router.patch('/:id/finish', (req, res) => matchesController.finish(req, res));
 router.post('/:id/goals', (req, res) => matchesController.registerGoal(req, res));
 router.delete('/:id/goals/:eventId', (req, res) => matchesController.deleteGoal(req, res));
+router.patch('/:id/goalkeepers', (req, res) => matchesController.updateGoalkeepers(req, res));
 
 export default router;

@@ -27,41 +27,42 @@
 }
 
 :root {
-  /* Grafite profundo */
-  --background: #0D0F14;
-  --surface: #13181F;
-  --surface-2: #181E28;
-  --surface-hover: #1E2535;
-  --border-color: #252D3D;
+  /* Obsidian Profundo & High-Tech Athletic Dark */
+  --background: #080A10;
+  --surface: #0F1420;
+  --surface-2: #161D2E;
+  --surface-hover: #1E283E;
+  --border-color: #232E44;
 
-  /* Accent — laranja fogo → âmbar */
-  --accent: #F97316;
-  --accent-light: #FB923C;
-  --accent-dark: #EA580C;
-  --accent-glow: rgba(249, 115, 22, 0.2);
+  /* Accent — Electric Volt Neon (Velocidade & Performance) */
+  --accent: #CCFF00;
+  --accent-light: #DEFF4D;
+  --accent-dark: #A6D900;
+  --accent-glow: rgba(204, 255, 0, 0.25);
 
-  /* Secundário — azul elétrico para destaques */
-  --secondary: #3B82F6;
-  --secondary-light: #60A5FA;
+  /* Secundário — Hyper Cyan / Elétrico */
+  --secondary: #00F0FF;
+  --secondary-light: #67E8F9;
+  --secondary-dark: #0891B2;
 
   /* Semânticos */
-  --muted: #5A6480;
-  --muted-light: #8A95B0;
-  --success: #22C55E;
-  --danger: #EF4444;
-  --warning: #EAB308;
-  --foreground: #EEF2FF;
-  --foreground-muted: #B0BAD0;
+  --muted: #64748B;
+  --muted-light: #94A3B8;
+  --success: #10B981;
+  --danger: #F43F5E;
+  --warning: #F59E0B;
+  --foreground: #F8FAFC;
+  --foreground-muted: #94A3B8;
 
   /* Times */
-  --team-blue: #3B82F6;
-  --team-red: #EF4444;
-  --team-black: #374151;
-  --team-green: #22C55E;
-  --team-yellow: #EAB308;
+  --team-blue: #00F0FF;
+  --team-red: #F43F5E;
+  --team-black: #1E293B;
+  --team-green: #10B981;
+  --team-yellow: #CCFF00;
   --team-white: #F8FAFC;
-  --team-orange: #F97316;
-  --team-purple: #A855F7;
+  --team-orange: #FB923C;
+  --team-purple: #C084FC;
 
   /* Layout */
   --bottom-nav-height: 5rem;
@@ -140,9 +141,9 @@ main {
   to   { opacity: 1; transform: scale(1); }
 }
 
-@keyframes pulse-glow-orange {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
-  50%       { box-shadow: 0 0 18px 6px rgba(249, 115, 22, 0.18); }
+@keyframes pulse-glow-volt {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
+  50%       { box-shadow: 0 0 20px 6px rgba(204, 255, 0, 0.22); }
 }
 
 @keyframes shimmer {
@@ -159,14 +160,14 @@ main {
 
 @keyframes goal-flash {
   0%, 100% { background: transparent; }
-  20%       { background: rgba(249, 115, 22, 0.12); }
+  20%       { background: rgba(204, 255, 0, 0.15); }
 }
 
 .animate-fade-in       { animation: fade-in 0.35s ease-out both; }
 .animate-fade-in-up    { animation: fade-in-up 0.45s ease-out both; }
 .animate-slide-in-bottom { animation: slide-in-bottom 0.3s cubic-bezier(.22,1,.36,1) both; }
 .animate-scale-in      { animation: scale-in 0.3s ease-out both; }
-.animate-pulse-glow    { animation: pulse-glow-orange 2.5s ease-in-out infinite; }
+.animate-pulse-glow    { animation: pulse-glow-volt 2.5s ease-in-out infinite; }
 .animate-bounce-score  { animation: bounce-score 0.5s cubic-bezier(.34,1.56,.64,1) both; }
 .animate-goal-flash    { animation: goal-flash 0.8s ease-out; }
 
@@ -192,7 +193,7 @@ main {
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 .card-hover:hover {
-  border-color: rgba(249, 115, 22, 0.35);
+  border-color: rgba(204, 255, 0, 0.4);
   background: var(--surface-hover);
   transform: translateY(-1px);
 }
@@ -200,12 +201,12 @@ main {
 .glass-card {
   background: linear-gradient(
     145deg,
-    rgba(19, 24, 31, 0.85) 0%,
-    rgba(19, 24, 31, 0.65) 100%
+    rgba(15, 20, 32, 0.85) 0%,
+    rgba(15, 20, 32, 0.65) 100%
   );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(37, 45, 61, 0.8);
+  border: 1px solid rgba(35, 46, 68, 0.8);
   border-radius: var(--radius);
 }
 
@@ -213,7 +214,7 @@ main {
   transition: all 0.2s ease;
 }
 .glass-card-hover:hover {
-  border-color: rgba(249, 115, 22, 0.3);
+  border-color: rgba(204, 255, 0, 0.35);
   transform: translateY(-1px);
 }
 
@@ -223,15 +224,15 @@ main {
 }
 .card-accent-hover:hover {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 4px 24px rgba(249, 115, 22, 0.1);
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 24px rgba(204, 255, 0, 0.15);
 }
 
 /* ============================================================
-   Gradiente Laranja (texto + bg)
+   Gradientes (texto + bg)
    ============================================================ */
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--accent) 0%, #FBBF24 100%);
+  background: linear-gradient(135deg, #CCFF00 0%, #00F0FF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -245,11 +246,11 @@ main {
 }
 
 .bg-accent-gradient {
-  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 50%, #FBBF24 100%);
+  background: linear-gradient(135deg, #CCFF00 0%, #00F0FF 100%);
 }
 
 .bg-accent-subtle {
-  background: rgba(249, 115, 22, 0.1);
+  background: rgba(204, 255, 0, 0.1);
 }
 
 /* ============================================================
@@ -261,7 +262,7 @@ main {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
   border-radius: var(--radius-sm);
   border: none;
@@ -272,13 +273,14 @@ main {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.3);
+  background: linear-gradient(135deg, #CCFF00 0%, #B4E600 100%);
+  color: #080A10;
+  font-weight: 800;
+  box-shadow: 0 2px 14px rgba(204, 255, 0, 0.35);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--accent) 0%, #FBBF24 100%);
-  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.45);
+  background: linear-gradient(135deg, #DEFF4D 0%, #CCFF00 100%);
+  box-shadow: 0 4px 22px rgba(204, 255, 0, 0.5);
   transform: translateY(-1px);
 }
 .btn-primary:active { transform: translateY(0); }
@@ -291,7 +293,7 @@ main {
 .btn-secondary:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(249, 115, 22, 0.06);
+  background: rgba(204, 255, 0, 0.08);
 }
 
 .btn-ghost {

@@ -22,6 +22,7 @@ export interface MatchTeamPlayer {
   name: string;
   nickname: string | null;
   avatar_url: string | null;
+  stars?: number;
 }
 
 export interface MatchTeam {
@@ -38,6 +39,8 @@ export interface MatchDetails {
   score_a: number;
   score_b: number;
   match_order: number;
+  goalkeeper_a_id: string | null;
+  goalkeeper_b_id: string | null;
   started_at: string | null;
   finished_at: string | null;
   created_at: string;
@@ -47,11 +50,21 @@ export interface MatchDetails {
 }
 
 export const matchesService = {
-  create: (data: { roundId: string; teamAId: string; teamBId: string; matchOrder?: number }) =>
-    apiPost<{ matchId: string }>('/api/matches', data),
+  create: (data: {
+    roundId: string;
+    teamAId: string;
+    teamBId: string;
+    matchOrder?: number;
+    goalkeeperAId?: string | null;
+    goalkeeperBId?: string | null;
+  }) => apiPost<{ matchId: string }>('/api/matches', data),
   getDetails: (id: string) => apiGet<MatchDetails>(`/api/matches/${id}`),
   start: (id: string) => apiPatch(`/api/matches/${id}/start`),
   finish: (id: string) => apiPatch(`/api/matches/${id}/finish`),
+  updateGoalkeepers: (
+    id: string,
+    data: { goalkeeperAId?: string | null; goalkeeperBId?: string | null },
+  ) => apiPatch(`/api/matches/${id}/goalkeepers`, data),
   registerGoal: (
     id: string,
     data: { teamId: string; playerId: string; assistPlayerId?: string | null; minute?: number | null },

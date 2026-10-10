@@ -27,7 +27,7 @@ export interface TeamWithDetails {
   round_id: string;
   name: string;
   color: string;
-  players: { id: string; name: string; nickname: string | null }[];
+  players: { id: string; name: string; nickname: string | null; stars?: number }[];
 }
 
 export interface MatchSummary {
@@ -38,6 +38,8 @@ export interface MatchSummary {
   score_b: number;
   status: string;
   match_order: number;
+  goalkeeper_a_id?: string | null;
+  goalkeeper_b_id?: string | null;
   started_at: Date | null;
   finished_at: Date | null;
 }

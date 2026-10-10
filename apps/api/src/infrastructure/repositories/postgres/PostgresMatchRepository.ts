@@ -63,6 +63,8 @@ export class PostgresMatchRepository implements IMatchRepository {
         score,
         status: MatchStatus.create(r.status),
         matchOrder: r.match_order,
+        goalkeeperAId: r.goalkeeper_a_id ?? null,
+        goalkeeperBId: r.goalkeeper_b_id ?? null,
         startedAt: r.started_at ? new Date(r.started_at) : null,
         finishedAt: r.finished_at ? new Date(r.finished_at) : null,
         createdAt: new Date(r.created_at),
@@ -76,7 +78,7 @@ export class PostgresMatchRepository implements IMatchRepository {
     const match = matchRows[0];
 
     const teamRows = await sql`
-      SELECT t.*, tp.player_id, p.id as p_id, p.name as p_name, p.nickname as p_nickname, p.avatar_url as p_avatar_url
+      SELECT t.*, tp.player_id, p.id as p_id, p.name as p_name, p.nickname as p_nickname, p.avatar_url as p_avatar_url, COALESCE(p.stars, 2) as p_stars
       FROM teams t
       LEFT JOIN team_players tp ON tp.team_id = t.id
       LEFT JOIN players p ON p.id = tp.player_id
@@ -98,6 +100,7 @@ export class PostgresMatchRepository implements IMatchRepository {
             name: r.p_name,
             nickname: r.p_nickname,
             avatar_url: r.p_avatar_url,
+            stars: Number(r.p_stars ?? 2),
           })),
       };
     };
@@ -121,6 +124,8 @@ export class PostgresMatchRepository implements IMatchRepository {
       score_a: match.score_a,
       score_b: match.score_b,
       match_order: match.match_order,
+      goalkeeper_a_id: match.goalkeeper_a_id ?? null,
+      goalkeeper_b_id: match.goalkeeper_b_id ?? null,
       started_at: match.started_at ? new Date(match.started_at) : null,
       finished_at: match.finished_at ? new Date(match.finished_at) : null,
       created_at: new Date(match.created_at),
@@ -141,12 +146,22 @@ export class PostgresMatchRepository implements IMatchRepository {
 
   public async create(match: Match): Promise<void> {
     await sql`
-      INSERT INTO matches (id, round_id, team_a_id, team_b_id, score_a, score_b, status, match_order, created_at)
+      INSERT INTO matches (id, round_id, team_a_id, team_b_id, score_a, score_b, status, match_order, goalkeeper_a_id, goalkeeper_b_id, created_at)
       VALUES (
         ${match.id}, ${match.roundId}, ${match.teamAId}, ${match.teamBId},
         ${match.score.scoreA}, ${match.score.scoreB}, ${match.status.value},
-        ${match.matchOrder}, ${match.createdAt.toISOString()}
+        ${match.matchOrder}, ${match.goalkeeperAId ?? null}, ${match.goalkeeperBId ?? null}, ${match.createdAt.toISOString()}
       )
+    `;
+  }
+
+  public async updateGoalkeepers(matchId: string, gkAId?: string | null, gkBId?: string | null): Promise<void> {
+    await sql`
+      UPDATE matches
+      SET
+        goalkeeper_a_id = ${gkAId !== undefined ? (gkAId || null) : sql`goalkeeper_a_id`},
+        goalkeeper_b_id = ${gkBId !== undefined ? (gkBId || null) : sql`goalkeeper_b_id`}
+      WHERE id = ${matchId}
     `;
   }
 
@@ -160,6 +175,8 @@ export class PostgresMatchRepository implements IMatchRepository {
         score_a = ${match.score.scoreA},
         score_b = ${match.score.scoreB},
         status = ${match.status.value},
+        goalkeeper_a_id = ${match.goalkeeperAId ?? null},
+        goalkeeper_b_id = ${match.goalkeeperBId ?? null},
         started_at = ${match.startedAt ? match.startedAt.toISOString() : null},
         finished_at = ${match.finishedAt ? match.finishedAt.toISOString() : null}
       WHERE id = ${match.id}
@@ -188,16 +205,16 @@ export class PostgresMatchRepository implements IMatchRepository {
       }
     }
 
-    const teamAPlayers = await sql<{ player_id: string }[]>`
+    const teamAPlayers = (await sql`
       SELECT player_id FROM team_players WHERE team_id = ${match.teamAId}
-    `;
-    const teamBPlayers = await sql<{ player_id: string }[]>`
+    `) as { player_id: string }[];
+    const teamBPlayers = (await sql`
       SELECT player_id FROM team_players WHERE team_id = ${match.teamBId}
-    `;
+    `) as { player_id: string }[];
 
-    const events = await sql<{ player_id: string; assist_player_id: string | null }[]>`
+    const events = (await sql`
       SELECT player_id, assist_player_id FROM match_events WHERE match_id = ${match.id}
-    `;
+    `) as { player_id: string; assist_player_id: string | null }[];
 
     const goalsByPlayer: Record<string, number> = {};
     const assistsByPlayer: Record<string, number> = {};

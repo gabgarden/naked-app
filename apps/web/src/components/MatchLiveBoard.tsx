@@ -3,13 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { matchesService, MatchDetails, MatchTeamPlayer } from '../services/matches.service';
-import { ArrowLeft, Plus, Clock, Trophy, Trash2, Play, Pause, RotateCcw, X, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, Trophy, Trash2, Play, Pause, RotateCcw, X, Shield, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
-import { getInitials, getDisplayName } from '../lib/utils';
+import { getDisplayName } from '../lib/utils';
 
 interface MatchLiveBoardProps {
   initialMatch: MatchDetails;
   matchDuration?: number; // duration in minutes (default 10)
+}
+
+function getFirstNameOnly(name?: string | null, nickname?: string | null): string {
+  if (nickname && nickname.trim()) return nickname.trim();
+  if (!name) return 'Jogador';
+  return name.trim().split(/\s+/)[0] || name;
 }
 
 export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBoardProps) {
@@ -67,9 +73,15 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
     scorerId: string | null;
   }>({ open: false, teamId: '', scorerId: null });
 
+  // Goalkeeper Switcher modal state
+  const [gkModal, setGkModal] = useState<{
+    open: boolean;
+    team: 'A' | 'B';
+  }>({ open: false, team: 'A' });
+
   async function handleFinish() {
     if (
-      !confirm('Are you sure you want to finish this match? The result will compute points in the ranking!')
+      !confirm('Tem certeza que deseja finalizar esta partida? Os pontos serão computados no ranking!')
     ) {
       return;
     }
@@ -81,7 +93,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
       setMatch((prev) => ({ ...prev, status: 'finished' }));
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error finishing match.');
+      setError(err instanceof Error ? err.message : 'Erro ao finalizar partida.');
     } finally {
       setLoading(false);
     }
@@ -109,7 +121,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
       setGoalModal({ open: false, teamId: '', scorerId: null });
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error registering goal.');
+      setError(err instanceof Error ? err.message : 'Erro ao registrar gol.');
     } finally {
       setLoading(false);
     }
@@ -117,7 +129,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
 
   async function handleDeleteEvent(eventId: string, teamId: string) {
     if (isFinished) return;
-    if (!confirm('Do you want to cancel this goal?')) return;
+    if (!confirm('Deseja cancelar este gol?')) return;
 
     setLoading(true);
     try {
@@ -126,16 +138,48 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
       setMatch(updated);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error removing event.');
+      setError(err instanceof Error ? err.message : 'Erro ao remover gol.');
     } finally {
       setLoading(false);
     }
   }
 
-  // Active team in modal
+  async function handleSelectGoalkeeper(playerId: string) {
+    const isTeamA = gkModal.team === 'A';
+    const newGkA = isTeamA ? playerId : match.goalkeeper_a_id;
+    const newGkB = !isTeamA ? playerId : match.goalkeeper_b_id;
+
+    setLoading(true);
+    try {
+      await matchesService.updateGoalkeepers(match.id, {
+        goalkeeperAId: newGkA,
+        goalkeeperBId: newGkB,
+      });
+      setMatch((prev) => ({
+        ...prev,
+        goalkeeper_a_id: newGkA,
+        goalkeeper_b_id: newGkB,
+      }));
+      setGkModal({ open: false, team: 'A' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao trocar goleiro.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Active team in goal modal
   const activeTeam = match.team_a?.id === goalModal.teamId ? match.team_a : match.team_b;
   const activePlayers: MatchTeamPlayer[] = activeTeam?.players || [];
   const otherPlayers = activePlayers.filter((p) => p.id !== goalModal.scorerId);
+
+  // Goalkeeper helpers
+  const currentGkAPlayer = match.team_a?.players?.find((p) => p.id === match.goalkeeper_a_id);
+  const currentGkBPlayer = match.team_b?.players?.find((p) => p.id === match.goalkeeper_b_id);
+
+  const gkModalTeamObj = gkModal.team === 'A' ? match.team_a : match.team_b;
+  const gkModalPlayers = gkModalTeamObj?.players || [];
+  const activeGkId = gkModal.team === 'A' ? match.goalkeeper_a_id : match.goalkeeper_b_id;
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -152,12 +196,12 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
         <div
           className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
           style={{
-            background: isFinished ? 'var(--surface-hover)' : 'rgba(249,115,22,0.15)',
+            background: isFinished ? 'var(--surface-hover)' : 'rgba(204,255,0,0.15)',
             color: isFinished ? 'var(--muted)' : 'var(--accent)',
           }}
         >
           {!isFinished && <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />}
-          {isFinished ? 'Finished' : match.status === 'in_progress' ? 'In Progress' : 'Pending'}
+          {isFinished ? 'Finalizada' : match.status === 'in_progress' ? 'Ao Vivo' : 'Pendente'}
         </div>
       </div>
 
@@ -165,9 +209,9 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
         <div
           className="p-3.5 rounded-xl text-xs font-semibold text-center"
           style={{
-            background: 'rgba(239,68,68,0.12)',
+            background: 'rgba(244,63,94,0.12)',
             color: 'var(--danger)',
-            border: '1px solid rgba(239,68,68,0.2)',
+            border: '1px solid rgba(244,63,94,0.2)',
           }}
         >
           {error}
@@ -240,6 +284,25 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
               {match.score_a}
             </span>
 
+            {/* Goalkeeper indicator & switcher for Team A */}
+            <button
+              type="button"
+              onClick={() => !isFinished && setGkModal({ open: true, team: 'A' })}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all active:scale-95 cursor-pointer max-w-full truncate"
+              style={{
+                background: 'rgba(204,255,0,0.08)',
+                borderColor: 'rgba(204,255,0,0.35)',
+                color: 'var(--accent)',
+              }}
+              title="Clique para trocar o goleiro deste time"
+            >
+              <span className="text-xs">🧤</span>
+              <span className="truncate">
+                {getFirstNameOnly(currentGkAPlayer?.name, currentGkAPlayer?.nickname)}
+              </span>
+              {!isFinished && <span className="text-[10px] opacity-70 underline">trocar</span>}
+            </button>
+
             {!isFinished && (
               <button
                 type="button"
@@ -247,9 +310,9 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                   setGoalModal({ open: true, teamId: match.team_a?.id || '', scorerId: null })
                 }
                 disabled={loading}
-                className="mt-1 w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
+                className="mt-2 w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
                 style={{
-                  background: 'rgba(249,115,22,0.15)',
+                  background: 'rgba(204,255,0,0.15)',
                   border: '1px solid var(--accent)',
                   color: 'var(--accent)',
                 }}
@@ -268,7 +331,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center text-xs font-bold border-2 shadow-sm text-center px-1"
               style={{
-                borderColor: match.team_b?.color || 'var(--accent)',
+                borderColor: match.team_b?.color || 'var(--secondary)',
                 background: 'var(--surface-hover)',
                 color: 'var(--foreground)',
               }}
@@ -282,6 +345,25 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
               {match.score_b}
             </span>
 
+            {/* Goalkeeper indicator & switcher for Team B */}
+            <button
+              type="button"
+              onClick={() => !isFinished && setGkModal({ open: true, team: 'B' })}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all active:scale-95 cursor-pointer max-w-full truncate"
+              style={{
+                background: 'rgba(0,240,255,0.08)',
+                borderColor: 'rgba(0,240,255,0.35)',
+                color: 'var(--secondary)',
+              }}
+              title="Clique para trocar o goleiro deste time"
+            >
+              <span className="text-xs">🧤</span>
+              <span className="truncate">
+                {getFirstNameOnly(currentGkBPlayer?.name, currentGkBPlayer?.nickname)}
+              </span>
+              {!isFinished && <span className="text-[10px] opacity-70 underline">trocar</span>}
+            </button>
+
             {!isFinished && (
               <button
                 type="button"
@@ -289,11 +371,11 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                   setGoalModal({ open: true, teamId: match.team_b?.id || '', scorerId: null })
                 }
                 disabled={loading}
-                className="mt-1 w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
+                className="mt-2 w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
                 style={{
-                  background: 'rgba(249,115,22,0.15)',
-                  border: '1px solid var(--accent)',
-                  color: 'var(--accent)',
+                  background: 'rgba(0,240,255,0.15)',
+                  border: '1px solid var(--secondary)',
+                  color: 'var(--secondary)',
                 }}
               >
                 <Plus className="w-6 h-6" />
@@ -309,13 +391,13 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
           className="text-xs font-bold uppercase tracking-wider px-1 flex items-center gap-1.5"
           style={{ color: 'var(--muted)' }}
         >
-          <Clock className="w-4 h-4" /> Goals Timeline
+          <Clock className="w-4 h-4" /> Linha do Tempo de Gols
         </h2>
 
         <div className="space-y-2">
-          {(!match.match_events || match.match_events.length === 0) ? (
+          {!match.match_events || match.match_events.length === 0 ? (
             <div className="card p-5 text-center text-xs" style={{ color: 'var(--muted)' }}>
-              No goals recorded in this match yet.
+              Nenhum gol registrado nesta partida ainda.
             </div>
           ) : (
             match.match_events.map((ev) => {
@@ -340,13 +422,13 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                     <span className="text-xl">⚽</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold truncate" style={{ color: 'var(--foreground)' }}>
-                        {getDisplayName(ev.player?.name || 'Player', ev.player?.nickname)}
+                        {getFirstNameOnly(ev.player?.name, ev.player?.nickname)}
                       </p>
                       {ev.assist_player && (
                         <p className="text-[11px]" style={{ color: 'var(--muted)' }}>
-                          Assist:{' '}
+                          Assistência:{' '}
                           <span style={{ color: 'var(--foreground)' }}>
-                            {getDisplayName(ev.assist_player.name, ev.assist_player.nickname)}
+                            {getFirstNameOnly(ev.assist_player.name, ev.assist_player.nickname)}
                           </span>
                         </p>
                       )}
@@ -357,7 +439,7 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                         type="button"
                         onClick={() => handleDeleteEvent(ev.id, ev.team_id)}
                         disabled={loading}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[rgba(239,68,68,0.15)] disabled:opacity-50"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[rgba(244,63,94,0.15)] disabled:opacity-50"
                         style={{ color: 'var(--muted)' }}
                       >
                         <Trash2 className="w-4 h-4 hover:text-[var(--danger)]" />
@@ -379,30 +461,92 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
             onClick={handleFinish}
             disabled={loading}
             className="btn btn-secondary w-full py-4 text-sm font-bold"
-            style={{ color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)' }}
+            style={{ color: 'var(--danger)', borderColor: 'rgba(244,63,94,0.3)' }}
           >
             <Trophy className="w-5 h-5" />
-            Finish Match
+            Finalizar Partida
           </button>
+        </div>
+      )}
+
+      {/* GOALKEEPER SWITCHER MODAL */}
+      {gkModal.open && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="card w-full max-w-sm overflow-hidden flex flex-col max-h-[85vh] animate-slide-in-bottom border-2 border-[var(--accent)]">
+            <div
+              className="p-4 flex items-center justify-between"
+              style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}
+            >
+              <div>
+                <span className="text-[10px] uppercase font-bold text-muted">Troca durante o jogo</span>
+                <h3 className="font-extrabold text-sm text-white flex items-center gap-1.5">
+                  <span>🧤 Escolher Goleiro - {gkModalTeamObj?.name}</span>
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGkModal({ open: false, team: 'A' })}
+                className="p-1 rounded-lg text-muted hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto space-y-2 flex-1">
+              {gkModalPlayers.map((player) => {
+                const isCurrentGk = activeGkId === player.id;
+                return (
+                  <button
+                    key={player.id}
+                    type="button"
+                    onClick={() => handleSelectGoalkeeper(player.id)}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${
+                      isCurrentGk ? 'ring-2 ring-[var(--accent)]' : 'hover:scale-[1.01]'
+                    }`}
+                    style={{
+                      background: isCurrentGk ? 'rgba(204,255,0,0.12)' : 'var(--surface-2)',
+                      borderColor: isCurrentGk ? 'var(--accent)' : 'var(--border-color)',
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">🧤</span>
+                      <div>
+                        <span className="font-bold text-xs text-white block">
+                          {getFirstNameOnly(player.name, player.nickname)}
+                        </span>
+                        <span className="text-[10px] text-amber-400 font-semibold">
+                          {'⭐'.repeat(player.stars ?? 2)}
+                        </span>
+                      </div>
+                    </div>
+                    {isCurrentGk && (
+                      <span className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider">
+                        No Gol
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
 
       {/* GOAL REGISTRATION MODAL */}
       {goalModal.open && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="card w-full max-w-sm overflow-hidden flex flex-col max-h-[85vh] animate-slide-in-bottom">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="card w-full max-w-sm overflow-hidden flex flex-col max-h-[85vh] animate-slide-in-bottom border-2 border-[var(--accent)]">
             <div
               className="p-4 flex items-center justify-between"
               style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}
             >
               <h3 className="font-bold text-sm" style={{ color: 'var(--foreground)' }}>
-                {goalModal.scorerId ? 'Who provided the assist?' : 'Who scored the goal?'}
+                {goalModal.scorerId ? 'Quem deu a assistência?' : 'Quem marcou o gol?'}
               </h3>
               <button
                 type="button"
                 onClick={() => setGoalModal({ open: false, teamId: '', scorerId: null })}
-                className="p-1 rounded-lg"
-                style={{ color: 'var(--muted)' }}
+                className="p-1 rounded-lg text-muted hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -413,35 +557,38 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                 // Step 1: Select scorer
                 activePlayers.length === 0 ? (
                   <div className="p-4 text-center text-xs" style={{ color: 'var(--muted)' }}>
-                    No players found in this team.
+                    Nenhum jogador encontrado neste time.
                   </div>
                 ) : (
-                  activePlayers.map((player) => (
-                    <button
-                      key={player.id}
-                      type="button"
-                      onClick={() => setGoalModal((prev) => ({ ...prev, scorerId: player.id }))}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left"
-                      style={{
-                        background: 'var(--surface-hover)',
-                        border: '1px solid var(--border-color)',
-                      }}
-                    >
-                      <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold"
+                  activePlayers.map((player) => {
+                    const isGk =
+                      (goalModal.teamId === match.team_a?.id && player.id === match.goalkeeper_a_id) ||
+                      (goalModal.teamId === match.team_b?.id && player.id === match.goalkeeper_b_id);
+
+                    return (
+                      <button
+                        key={player.id}
+                        type="button"
+                        onClick={() => setGoalModal((prev) => ({ ...prev, scorerId: player.id }))}
+                        className="w-full flex items-center justify-between p-3 rounded-xl transition-all text-left border"
                         style={{
-                          background: 'linear-gradient(135deg, var(--accent-dark), var(--accent))',
-                          color: '#fff',
+                          background: 'var(--surface-hover)',
+                          borderColor: 'var(--border-color)',
                         }}
                       >
-                        {getInitials(player.name)}
-                      </div>
-                      <span className="font-bold text-xs flex-1 truncate" style={{ color: 'var(--foreground)' }}>
-                        {getDisplayName(player.name, player.nickname)}
-                      </span>
-                      <span className="text-xl">⚽</span>
-                    </button>
-                  ))
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-bold text-xs text-white">
+                            {getFirstNameOnly(player.name, player.nickname)}
+                          </span>
+                          <span className="text-[10px] text-amber-400">
+                            {'⭐'.repeat(player.stars ?? 2)}
+                          </span>
+                          {isGk && <span className="text-xs" title="Goleiro">🧤</span>}
+                        </div>
+                        <span className="text-xl">⚽</span>
+                      </button>
+                    );
+                  })
                 )
               ) : (
                 // Step 2: Select assist or solo goal
@@ -452,11 +599,11 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                     disabled={loading}
                     className="btn btn-primary w-full py-3 text-xs mb-3"
                   >
-                    Solo Goal (No assist)
+                    Gol Individual (Sem assistência)
                   </button>
 
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-2 px-1" style={{ color: 'var(--muted)' }}>
-                    Or select the playmaker:
+                    Ou selecione o autor do passe:
                   </p>
 
                   {otherPlayers.map((player) => (
@@ -465,21 +612,20 @@ export function MatchLiveBoard({ initialMatch, matchDuration = 10 }: MatchLiveBo
                       type="button"
                       onClick={() => handleRegisterGoal(player.id)}
                       disabled={loading}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left"
+                      className="w-full flex items-center justify-between p-3 rounded-xl transition-all text-left border"
                       style={{
                         background: 'var(--surface-hover)',
-                        border: '1px solid var(--border-color)',
+                        borderColor: 'var(--border-color)',
                       }}
                     >
-                      <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: 'var(--surface)', color: 'var(--foreground)' }}
-                      >
-                        {getInitials(player.name)}
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-bold text-xs text-white">
+                          {getFirstNameOnly(player.name, player.nickname)}
+                        </span>
+                        <span className="text-[10px] text-amber-400">
+                          {'⭐'.repeat(player.stars ?? 2)}
+                        </span>
                       </div>
-                      <span className="font-bold text-xs flex-1 truncate" style={{ color: 'var(--foreground)' }}>
-                        {getDisplayName(player.name, player.nickname)}
-                      </span>
                       <span className="text-xl">🎯</span>
                     </button>
                   ))}

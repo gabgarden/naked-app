@@ -12,6 +12,7 @@ export interface TeamPlayer {
   id: string;
   name: string;
   nickname: string | null;
+  stars?: number;
 }
 
 export interface TeamWithDetails {
@@ -30,6 +31,8 @@ export interface MatchSummary {
   score_b: number;
   status: string;
   match_order: number;
+  goalkeeper_a_id?: string | null;
+  goalkeeper_b_id?: string | null;
   started_at: string | null;
   finished_at: string | null;
 }

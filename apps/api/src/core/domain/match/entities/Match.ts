@@ -11,6 +11,8 @@ export interface MatchProps {
   score: Score;
   status: MatchStatus;
   matchOrder: number;
+  goalkeeperAId?: string | null;
+  goalkeeperBId?: string | null;
   startedAt?: Date | null;
   finishedAt?: Date | null;
   createdAt?: Date;
@@ -25,6 +27,8 @@ export class Match {
   private _score: Score;
   private _status: MatchStatus;
   public readonly matchOrder: number;
+  public goalkeeperAId: string | null;
+  public goalkeeperBId: string | null;
   private _startedAt: Date | null;
   private _finishedAt: Date | null;
   public readonly createdAt: Date;
@@ -38,10 +42,17 @@ export class Match {
     this._score = props.score;
     this._status = props.status;
     this.matchOrder = props.matchOrder;
+    this.goalkeeperAId = props.goalkeeperAId ?? null;
+    this.goalkeeperBId = props.goalkeeperBId ?? null;
     this._startedAt = props.startedAt ?? null;
     this._finishedAt = props.finishedAt ?? null;
     this.createdAt = props.createdAt ?? new Date();
     this._events = props.events ?? [];
+  }
+
+  public setGoalkeepers(goalkeeperAId?: string | null, goalkeeperBId?: string | null): void {
+    if (goalkeeperAId !== undefined) this.goalkeeperAId = goalkeeperAId;
+    if (goalkeeperBId !== undefined) this.goalkeeperBId = goalkeeperBId;
   }
 
   public get score(): Score {

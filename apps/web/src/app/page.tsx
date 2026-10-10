@@ -143,15 +143,9 @@ export default async function HomePage() {
                 className={`flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[var(--surface-hover)] animate-fade-in stagger-${i + 1} ${i < ranking.length - 1 ? 'border-b border-[var(--border-color)]' : ''}`}
               >
                 <RankBadge rank={i + 1} />
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  style={{ background: 'var(--surface-hover)', color: 'var(--muted-light)' }}
-                >
-                  {(entry.nickname || entry.name).slice(0, 2).toUpperCase()}
-                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--foreground)' }}>
-                    {entry.nickname || entry.name}
+                  <p className="text-sm font-bold truncate" style={{ color: 'var(--foreground)' }}>
+                    {entry.nickname?.trim() || entry.name.trim().split(/\s+/)[0]}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px]" style={{ color: 'var(--muted)' }}>⚽ {entry.total_goals}</span>

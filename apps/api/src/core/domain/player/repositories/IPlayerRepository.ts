@@ -4,12 +4,14 @@ export interface CreatePlayerData {
   name: string;
   nickname?: string | null;
   avatar_url?: string | null;
+  stars?: number;
 }
 
 export interface UpdatePlayerData {
   name?: string;
   nickname?: string | null;
   avatar_url?: string | null;
+  stars?: number;
 }
 
 export interface PlayerStats {

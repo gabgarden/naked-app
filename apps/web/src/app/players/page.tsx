@@ -66,7 +66,10 @@ export default async function PlayersPage() {
                 {(player.nickname || player.name).slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate" style={{ color: 'var(--foreground)' }}>{player.name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm truncate" style={{ color: 'var(--foreground)' }}>{player.name}</p>
+                  <span className="text-xs text-amber-400 font-bold">{'⭐'.repeat(player.stars ?? 2)}</span>
+                </div>
                 {player.nickname && (
                   <p className="text-xs truncate" style={{ color: 'var(--muted)' }}>{player.nickname}</p>
                 )}

@@ -19,9 +19,9 @@ export default function BottomNav() {
       id="bottom-nav"
       style={{
         height: 'var(--bottom-nav-height)',
-        background: 'linear-gradient(180deg, rgba(13,15,20,0) 0%, var(--background) 30%)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        background: 'linear-gradient(180deg, rgba(8,10,16,0.3) 0%, rgba(8,10,16,0.95) 30%)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
       }}
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--border-color)]"
     >
@@ -39,7 +39,7 @@ export default function BottomNav() {
               <div
                 className="relative flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200"
                 style={{
-                  background: isActive ? 'rgba(249, 115, 22, 0.12)' : 'transparent',
+                  background: isActive ? 'rgba(204, 255, 0, 0.15)' : 'transparent',
                 }}
               >
                 <Icon

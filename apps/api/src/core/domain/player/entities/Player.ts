@@ -3,6 +3,7 @@ export interface PlayerProps {
   name: string;
   nickname?: string | null;
   avatarUrl?: string | null;
+  stars?: number;
   createdAt?: Date;
 }
 
@@ -11,6 +12,7 @@ export class Player {
   public readonly name: string;
   public readonly nickname: string | null;
   public readonly avatarUrl: string | null;
+  public readonly stars: number;
   public readonly createdAt: Date;
 
   constructor(props: PlayerProps) {
@@ -18,6 +20,7 @@ export class Player {
     this.name = props.name;
     this.nickname = props.nickname ?? null;
     this.avatarUrl = props.avatarUrl ?? null;
+    this.stars = Math.max(1, Math.min(3, props.stars ?? 2));
     this.createdAt = props.createdAt ?? new Date();
   }
 }

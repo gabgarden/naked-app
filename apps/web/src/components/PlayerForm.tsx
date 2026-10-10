@@ -11,6 +11,7 @@ export function PlayerForm({ player }: { player?: Player }) {
 
   const [name, setName] = useState(player?.name || '');
   const [nickname, setNickname] = useState(player?.nickname || '');
+  const [stars, setStars] = useState<number>(player?.stars ?? 2);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,11 +30,13 @@ export function PlayerForm({ player }: { player?: Player }) {
         await playersService.update(player.id, {
           name: name.trim(),
           nickname: nickname.trim() || null,
+          stars,
         });
       } else {
         await playersService.create({
           name: name.trim(),
           nickname: nickname.trim() || undefined,
+          stars,
         });
       }
 
@@ -105,6 +108,49 @@ export function PlayerForm({ player }: { player?: Player }) {
             onChange={(e) => setNickname(e.target.value)}
             placeholder="e.g. Johnny"
           />
+        </div>
+
+        {/* Nível / Estrelas (1 a 3) */}
+        <div className="space-y-2 pt-1">
+          <label className="text-sm font-semibold flex items-center justify-between" style={{ color: 'var(--foreground-muted)' }}>
+            <span>Classificação (Nível Técnico)</span>
+            <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>
+              {stars === 1 ? '⭐ Nível 1 (Iniciante)' : stars === 2 ? '⭐⭐ Nível 2 (Médio)' : '⭐⭐⭐ Nível 3 (Craque)'}
+            </span>
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { val: 1, label: '1 Estrela', desc: 'Iniciante' },
+              { val: 2, label: '2 Estrelas', desc: 'Equilibrado' },
+              { val: 3, label: '3 Estrelas', desc: 'Destaque' },
+            ].map((opt) => {
+              const isSelected = stars === opt.val;
+              return (
+                <button
+                  key={opt.val}
+                  type="button"
+                  onClick={() => setStars(opt.val)}
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
+                    isSelected ? 'ring-2' : ''
+                  }`}
+                  style={{
+                    background: isSelected ? 'rgba(204, 255, 0, 0.12)' : 'var(--surface-2)',
+                    borderColor: isSelected ? 'var(--accent)' : 'var(--border-color)',
+                  }}
+                >
+                  <div className="text-base">
+                    {'⭐'.repeat(opt.val)}
+                  </div>
+                  <span className="text-xs font-bold text-white leading-tight">
+                    {opt.label}
+                  </span>
+                  <span className="text-[10px] text-muted leading-none">
+                    {opt.desc}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
